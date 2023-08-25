@@ -1,0 +1,31 @@
+.main-sidebar,
+/* .main-header, */
+/* .main-footer, */
+.card-header,
+.btn-default,
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link,
+/* .navbar-nav > .nav-item > .nav-link, */
+.custom .nav-link.active,
+.page-item.active > .page-link {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
+}
+
+.page-item > .page-link {
+  color: #3f51b5 !important;
+}
+
+.btn-default,
+.btn-success,
+.btn-group > .btn,
+.icheckbox_flat-green > .checked,
+input:checked + .slider {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
+}
+
+.card-title > .btn {
+  background-color: #fff !important;
+  color: #3f51b5 !important;
+}
