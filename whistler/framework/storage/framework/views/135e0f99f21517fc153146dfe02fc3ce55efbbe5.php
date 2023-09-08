@@ -137,7 +137,7 @@
                                                 <option></option>
                                                 <?php $__currentLoopData = $sites; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <option value="<?php echo e($s->id); ?>">
-                                                        <?php echo e($s->sites->site_name); ?>
+                                                        <?php echo e($s->site_name); ?>
 
                                                     </option>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -155,7 +155,9 @@
 
                                         <div class="col-xs-6">
                                             <select name="shift_id" class="form-control" id="shift_name">
-                                                <!-- Options will be populated by JavaScript -->
+                                                <option></option>
+                                                <option value="1">Morning</option>
+                                                <option value="2">Evening</option>
                                             </select>
                                         </div>
                                     </div>
@@ -176,7 +178,7 @@
                                             <div class="input-group date">
                                                 <div class="input-group-prepend"><span class="input-group-text"><i
                                                             class="fa fa-calendar"></i></span></div>
-                                                <?php echo Form::date('date', null, ['class' => 'form-control', 'required']); ?>
+                                                <?php echo Form::date('date', null, ['class' => 'form-control', 'required', 'id' => 'report_date']); ?>
 
                                             </div>
                                         </div>
@@ -295,7 +297,8 @@
 
                                                 <div class="col-xs-6">
                                                     <?php echo Form::textarea('shift_yield_details', null, [
-                                                        'class' => 'form-control', 'rows' => '5',
+                                                        'class' => 'form-control',
+                                                        'rows' => '5',
                                                     ]); ?>
 
                                                 </div>
@@ -422,7 +425,7 @@
             //     }
             // });
 
-            $('#site_name, #shift_name').change(function() {
+            $('#site_name, #shift_name, #report_date').change(function() {
                 $("#vehicle_id_error").hide();
                 $("#vehicle_id").removeClass('error-border');
                 // Clearing the select menu
@@ -430,43 +433,53 @@
 
                 var siteId = $('#site_name').val();
                 var shiftId = $('#shift_name').val();
+                var reportDate = $('#report_date').val(); // Fetching the date value
+                console.log('reportDate: ', reportDate);
 
-                if (siteId && shiftId) {
+                if (siteId && shiftId && reportDate) { // Checking if all three values are present
                     $.ajax({
                         url: '<?php echo e(route('reports.deployed_fleet')); ?>',
                         type: 'GET',
                         data: {
                             site_id: siteId,
-                            shift_id: shiftId
+                            shift_id: shiftId,
+                            date: reportDate
                         },
                         success: function(response) {
                             console.log('deployed: ', response);
-                            $.each(response.fleet_details, function(i, vehicleDetail) {
-                                $('#vehicle_id_display').val(i);
-                            });
+                            // Clear out the existing vehicle display value
+                            $('#vehicle_id_display').val('');
+
+                            // Populate with new data if available
+                            if (Object.keys(response.fleet_details).length > 0) {
+                                $.each(response.fleet_details, function(i, vehicleDetail) {
+                                    $('#vehicle_id_display').val(i);
+                                });
+                            }
                         }
                     });
                 }
             });
 
-            $('#site_name').change(function() {
-                var siteId = $(this).val();
-                if (siteId) {
-                    $.get("<?php echo e(route('get_open_shift', '')); ?>/" + siteId, function(response) {
-                        console.log('shifts: ', response);
-                        // Clear existing options
-                        $('#shift_name').empty();
-                        $('#shift_name').append('<option></option>'); // Default empty option
 
-                        // Iterate through the response and add options
-                        response.forEach(function(shiftId) {
-                            var shiftText = shiftId == 1 ? 'Morning' : 'Evening';
-                            $('#shift_name').append('<option value="' + shiftId + '">' +
-                                shiftText + '</option>');
-                        });
-                    });
-                }
-            });
+            // $('#site_name').change(function() {
+            //     var siteId = $(this).val();
+            //     if (siteId) {
+            //         $.get("<?php echo e(route('get_open_shift', '')); ?>/" + siteId, function(response) {
+            //             console.log('shifts: ', response);
+            //             // Clear existing options
+            //             $('#shift_name').empty();
+            //             $('#shift_name').append('<option></option>'); // Default empty option
+
+            //             // Iterate through the response and add options
+            //             response.forEach(function(shiftId) {
+            //                 var shiftText = shiftId == 1 ? 'Morning' : 'Evening';
+            //                 $('#shift_name').append('<option value="' + shiftId + '">' +
+            //                     shiftText + '</option>');
+            //             });
+            //         });
+            //     }
+            // });
 
             $('#vehicle_id').change(function() {
                 if (!$(this).val()) {

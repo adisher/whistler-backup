@@ -45,6 +45,7 @@ class ServiceItemsController extends Controller
 
     public function store(ServiceItem $request)
     {
+        // dd($request->all());
         if ($request->get('time1') != null) {
             $overdue_time = $request->get('time1');
         } else {
@@ -54,7 +55,7 @@ class ServiceItemsController extends Controller
             'time_interval' => $request->get('chk1'),
             'overdue_time' => $overdue_time,
             'overdue_unit' => $request->get('interval1'),
-            'meter_interval' => $request->get('chk2'),
+            'meter_interval' => $request->get('meter_interval'), //replaced from chk2
             'overdue_meter' => $request->get('meter1'),
             'show_time' => $request->get('chk3'),
             'duesoon_time' => $request->get('time2'),

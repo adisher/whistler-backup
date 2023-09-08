@@ -31,7 +31,7 @@ Route::namespace ('Admin')->group(function () {
     //         //$d->givePermissionTo(['Transactions list','Transactions add','Transactions edit','Transactions delete']);
     //     }
     // });
-// dd('test');
+        // dd('test');
     Route::get("/", 'HomeController@index')->middleware(['lang_check', 'auth']);
     Route::group(['middleware' => ['lang_check', 'auth', 'officeadmin', 'IsInstalled']], function () {
 
@@ -41,6 +41,8 @@ Route::namespace ('Admin')->group(function () {
         Route::get('/check-fleet-no', 'VehicleTypeController@checkFleetNo')->name('check-fleet-no');
 
         Route::get('/vehicles/{id}/expense_amount', 'VehiclesController@getExpense')->name('vehicles.expense');
+        Route::get('/vehicles/getMeter/{id}', 'VehiclesController@getMeter')->name('vehicles.getMeter');
+
 
         Route::resource('shifts', ShiftController::class);
         Route::resource('maintenance', CorrectiveMaintenanceController::class);
@@ -97,6 +99,7 @@ Route::namespace ('Admin')->group(function () {
         Route::post('cancel-booking', 'BookingsController@cancel_booking');
         Route::resource('team', 'TeamController');
         Route::resource('company-services', 'CompanyServicesController');
+        Route::get('parts-unit-cost/{id}', 'CorrectiveMaintenanceController@get_unit_cost')->name('parts_unit_cost');
         Route::get('parts-used/{id}', 'WorkOrdersController@parts_used');
         Route::get('remove-part/{id}', 'WorkOrdersController@remove_part');
         Route::get('assigned-driver/{id}', 'WorkOrdersController@assigned_driver')->name('assigned_driver');
@@ -210,6 +213,9 @@ Route::namespace ('Admin')->group(function () {
         Route::get('test-key', 'SettingsController@test_key');
         Route::post('store-api', 'SettingsController@store_api');
         Route::resource('service-reminder', 'ServiceReminderController');
+        Route::resource('preventive-maintenance', 'PreventiveMaintenanceController');
+        Route::get('preventive_maintenance/logs', 'PreventiveMaintenanceController@logs');
+        Route::post('close-preventive-maintenance', 'PreventiveMaintenanceController@close_preventive_maintenance')->name('close_preventive_maintenance');
         Route::resource('service-item', 'ServiceItemsController');
         Route::post('/vehicle-group-fetch', 'VehicleGroupController@fetch_data');
         Route::resource('/vehicle_group', 'VehicleGroupController');

@@ -21,8 +21,8 @@ use App\Model\Expense;
 use App\Model\FuelModel;
 use App\Model\Hyvikk;
 use App\Model\IncomeModel;
-use App\Model\Site;
 use App\Model\ServiceReminderModel;
+use App\Model\Site;
 use App\Model\SiteLogsModel;
 use App\Model\SiteVehicleModel;
 use App\Model\User;
@@ -32,6 +32,7 @@ use App\Model\VehicleGroupModel;
 use App\Model\VehicleModel;
 use App\Model\VehicleReviewModel;
 use App\Model\VehicleTypeModel;
+use App\Model\VehicleMeterModel;
 use Auth;
 use Carbon\Carbon;
 use DataTables;
@@ -373,13 +374,20 @@ class VehiclesController extends Controller
 
     }
 
-    public function getExpense($id) {
-    $vehicle = VehicleModel::find($id);
-    return response()->json([
-        'expense_amount' => $vehicle->expense_amount,
-        'expense_type' => $vehicle->expense_type
-    ]);
-}
+    public function getExpense($id)
+    {
+        $vehicle = VehicleModel::find($id);
+        return response()->json([
+            'expense_amount' => $vehicle->expense_amount,
+            'expense_type' => $vehicle->expense_type,
+        ]);
+    }
+
+    public function getMeter($id)
+    {
+        $vehicleMeter = VehicleModel::where('id', $id)->first();
+        return response()->json(['start_meter' => $vehicleMeter ? $vehicleMeter->int_mileage : null]);
+    }
 
     public function update(Request $request)
     {
@@ -448,7 +456,6 @@ class VehiclesController extends Controller
         $vehicle->udf = serialize($request->get('udf'));
         $vehicle->average = $request->average;
         $vehicle->save();
-
 
         $to = \Carbon\Carbon::now();
 

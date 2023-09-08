@@ -12,7 +12,6 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PartsRequest;
 use App\Model\PartsCategoryModel;
 use App\Model\PartsModel;
 use App\Model\PartStock;
@@ -40,7 +39,7 @@ class PartsController extends Controller
 
     public function create()
     {
-        $vendors = Vendor::get();
+        $vendors = Vendor::where('type', 'parts')->get();
         $categories = PartsCategoryModel::get();
         return view("parts.create", compact('vendors', 'categories'));
     }
@@ -71,7 +70,7 @@ class PartsController extends Controller
     public function edit($id)
     {
         $index['data'] = PartsModel::whereId($id)->first();
-        $index['vendors'] = Vendor::get();
+        $index['vendors'] = Vendor::where('type', 'parts')->get();
         $index['categories'] = PartsCategoryModel::get();
 
         $index['udfs'] = unserialize($index['data']->udf);
@@ -116,7 +115,7 @@ class PartsController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        if($request->category_id == 'add_new_category'){
+        if ($request->category_id == 'add_new_category') {
             $type = PartsCategoryModel::create([
                 'user_id' => Auth::user()->id,
                 'name' => $request->new_category_name,
@@ -124,7 +123,7 @@ class PartsController extends Controller
             $request->category_id = $type->id;
         }
 
-        if($request->vendor_id == 'add_new_vendor'){
+        if ($request->vendor_id == 'add_new_vendor') {
             $vendor = Vendor::create([
                 'user_id' => Auth::user()->id,
                 'name' => $request->new_vendor_name,

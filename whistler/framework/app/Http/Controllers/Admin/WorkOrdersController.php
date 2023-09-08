@@ -20,6 +20,7 @@ use App\Model\PartsModel;
 use App\Model\PartsUsedModel;
 use App\Model\Site;
 use App\Model\User;
+use App\Model\VehicleMeterModel;
 use App\Model\VehicleModel;
 use App\Model\WorkOrderLogs;
 use App\Model\WorkOrders;
@@ -178,13 +179,13 @@ class WorkOrdersController extends Controller
         $order->date = $request->get('date');
         $order->start_meter = $request->get('start_meter');
         $order->work_hours = $request->get('work_hours') ?? '0';
-        $order->price = $request->get('price');
+        $order->price = $request->get('price') ?? '0';
         $order->user_id = Auth::user()->id;
         $order->save();
 
         $log = new WorkOrderLogs();
         $log->date = $request->get('date');
-        $log->price = $request->get('price');
+        $log->price = $request->get('price') ?? '0';
         $log->work_hours = $request->get('work_hours') ?? '0';
         $log->user_id = Auth::user()->id;
         $log->site_id = $request->get('site_id');
@@ -269,7 +270,7 @@ class WorkOrdersController extends Controller
     {
         $vehicle_id = $request->get('vehicle_id');
         $driver_id = $request->get('driver_id');
-        
+
         $order = WorkOrders::find($request->get("id"));
         $order->end_meter = $request->get('end_meter');
         $order->work_hours = $request->get('work_hours') ?? '0';
@@ -281,6 +282,20 @@ class WorkOrdersController extends Controller
         $log->work_hours = $request->get('work_hours') ?? '0';
         $log->price = $request->get('price');
         $log->save();
+
+        $vehicleMeter = VehicleModel::where('id', $vehicle_id)->first();
+
+        if ($vehicleMeter) {
+            // Update the existing record
+            $vehicleMeter->update(['int_mileage' => $request->get('end_meter')]);
+        } 
+        // else {
+        //     // Create a new record
+        //     VehicleMeterModel::create([
+        //         'vehicle_id' => $vehicle_id,
+        //         'start_meter' => $request->get('end_meter'),
+        //     ]);
+        // }
 
         DriverVehicleModel::where('driver_id', $driver_id)
             ->where('vehicle_id', $vehicle_id)

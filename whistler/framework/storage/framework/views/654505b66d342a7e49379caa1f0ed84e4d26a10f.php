@@ -17,7 +17,7 @@
         <h3 class="card-title">
         <?php echo app('translator')->get('fleet.serviceItems'); ?>
         &nbsp;
-        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems add')): ?><a href="<?php echo e(route('service-item.create')); ?>" class="btn btn-success"><?php echo app('translator')->get('fleet.add_service_item'); ?></a><?php endif; ?></h3>
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems add')): ?><a href="<?php echo e(route('service-item.create')); ?>" class="btn btn-success"><i class="fa fa-plus"></i></a><?php endif; ?></h3>
       </div>
 
       <div class="card-body table-responsive">
@@ -30,50 +30,46 @@
                 <?php endif; ?>
               </th>
               <th><?php echo app('translator')->get('fleet.description'); ?></th>
-              <th><?php echo app('translator')->get('fleet.service_interval'); ?></th>
-              <th><?php echo app('translator')->get('fleet.create_reminder'); ?></th>
+              <th>Planned Meter Interval (kms)</th>
               <th><?php echo app('translator')->get('fleet.action'); ?></th>
             </tr>
           </thead>
           <tbody>
           <?php $__currentLoopData = $services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            
             <tr>
               <td>
-                <input type="checkbox" name="ids[]" value="<?php echo e($service->id); ?>" class="checkbox" id="chk<?php echo e($service->id); ?>" onclick='checkcheckbox();'>
+                <input type="checkbox" name="ids[]" value="<?php echo e($service->id); ?>" class="checkbox" id="chk<?php echo e($service->id); ?>"
+                  onclick='checkcheckbox();'>
               </td>
               <td>
-              <?php echo e($service->description); ?>
+                <?php echo e($service->description); ?>
 
               </td>
               <td>
-              <?php echo e($service->overdue_time); ?> <?php echo e($service->overdue_unit); ?>
+                <?php echo e($service->meter_interval); ?>
 
-              <?php if($service->overdue_meter != null): ?>
-              <?php echo app('translator')->get('fleet.or'); ?> <?php echo e($service->overdue_meter); ?> <?php echo e(Hyvikk::get('dis_format')); ?>
-
-              <?php endif; ?>
               </td>
               <td>
-                <?php if($service->duesoon_time != null): ?>
-                  <?php echo e($service->duesoon_time); ?> <?php echo e($service->duesoon_unit); ?> <?php echo app('translator')->get('fleet.before_due'); ?>
-                <?php endif; ?>
-              </td>
-              <td>
-              <div class="btn-group">
-                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                  <span class="fa fa-gear"></span>
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <div class="dropdown-menu custom" role="menu">
-                  <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems edit')): ?><a class="dropdown-item" href="<?php echo e(url("admin/service-item/".$service->id."/edit")); ?>"> <span aria-hidden="true" class="fa fa-edit" style="color: #f0ad4e;"></span> <?php echo app('translator')->get('fleet.edit'); ?></a><?php endif; ?>
-                  <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems delete')): ?><a class="dropdown-item" data-id="<?php echo e($service->id); ?>" data-toggle="modal" data-target="#myModal"> <span aria-hidden="true" class="fa fa-trash" style="color: #dd4b39"></span> <?php echo app('translator')->get('fleet.delete'); ?></a><?php endif; ?>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                    <span class="fa fa-gear"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu custom" role="menu">
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems edit')): ?><a class="dropdown-item" href="<?php echo e(url("admin/service-item/".$service->id."/edit")); ?>">
+                      <span aria-hidden="true" class="fa fa-edit" style="color: #f0ad4e;"></span> <?php echo app('translator')->get('fleet.edit'); ?></a><?php endif; ?>
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems delete')): ?><a class="dropdown-item" data-id="<?php echo e($service->id); ?>" data-toggle="modal"
+                      data-target="#myModal"> <span aria-hidden="true" class="fa fa-trash" style="color: #dd4b39"></span>
+                      <?php echo app('translator')->get('fleet.delete'); ?></a><?php endif; ?>
+                  </div>
                 </div>
-              </div>
-              <?php echo Form::open(['url' => 'admin/service-item/'.$service->id,'method'=>'DELETE','class'=>'form-horizontal','id'=>'form_'.$service->id]); ?>
+                <?php echo Form::open(['url' =>
+                'admin/service-item/'.$service->id,'method'=>'DELETE','class'=>'form-horizontal','id'=>'form_'.$service->id]); ?>
 
-              <?php echo Form::hidden("id",$service->id); ?>
+                <?php echo Form::hidden("id",$service->id); ?>
 
-              <?php echo Form::close(); ?>
+                <?php echo Form::close(); ?>
 
               </td>
             </tr>
@@ -87,8 +83,7 @@
                 <?php endif; ?>
               </th>
               <th><?php echo app('translator')->get('fleet.description'); ?></th>
-              <th><?php echo app('translator')->get('fleet.service_interval'); ?></th>
-              <th><?php echo app('translator')->get('fleet.create_reminder'); ?></th>
+              <th>Planned Meter Interval (kms)</th>
               <th><?php echo app('translator')->get('fleet.action'); ?></th>
             </tr>
           </tfoot>

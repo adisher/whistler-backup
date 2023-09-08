@@ -76,8 +76,8 @@ class ShiftDetailsController extends Controller
      */
     public function create()
     {
-        // $sites = Site::all();
-        $sites = WorkOrders::with('sites')->where('end_meter', null)->where('work_hours', 0)->get();
+        $sites = Site::all();
+        // $sites = WorkOrders::with('sites')->where('end_meter', null)->where('work_hours', 0)->get();
 
         $users = User::where('group_id', 4)
             ->where('user_type', 'SI')

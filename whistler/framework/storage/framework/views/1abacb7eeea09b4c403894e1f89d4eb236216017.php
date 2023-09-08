@@ -1,6 +1,6 @@
 <?php $__env->startSection("breadcrumb"); ?>
-<li class="breadcrumb-item"><a href="<?php echo e(route('service-reminder.index')); ?>"><?php echo app('translator')->get('fleet.serviceReminders'); ?></a></li>
-<li class="breadcrumb-item active"><?php echo app('translator')->get('fleet.add_service_reminder'); ?></li>
+<li class="breadcrumb-item"><a href="<?php echo e(route('preventive-maintenance.index')); ?>">Preventive Maintenance</a></li>
+<li class="breadcrumb-item active">Add Preventive Maintenance</li>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('extra_css'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('assets/css/bootstrap-datepicker.min.css')); ?>">
@@ -10,9 +10,9 @@
   <div class="col-md-12">
     <div class="card card-success">
       <div class="card-header">
-        <h3 class="card-title"><?php echo app('translator')->get('fleet.serviceReminders'); ?></h3>
+        <h3 class="card-title">Preventive Maintenance</h3>
       </div>
-      <?php echo Form::open(['route' => 'service-reminder.store','method'=>'post']); ?>
+      <?php echo Form::open(['route' => 'preventive-maintenance.store','method'=>'post']); ?>
 
       <div class="card-body">
         <?php if(count($errors) > 0): ?>
@@ -37,26 +37,40 @@
               </select>
             </div>
             <div class="form-group">
-              <?php echo Form::label('start_meter_display', __('Last Meter Reading'), ['class' => 'form-label']); ?>
+              <?php echo Form::label('start_meter', __('Last Meter Reading'), ['class' => 'form-label']); ?>
 
               <div class="input-group date">
                 <div class="input-group-prepend"><span class="input-group-text"><?php echo e(Hyvikk::get('dis_format')); ?></span></div>
-                <?php echo Form::number('start_meter_display',null,['class'=>'form-control','required', 'min'=>'0',
+                <?php echo Form::number('start_meter',null,['class'=>'form-control','required', 'min'=>'0',
                 'readonly'
                 ]); ?>
 
               </div>
             </div>
-            <input type="hidden" name="start_meter" value="start meter reading">
             <div class="form-group">
-              <?php echo Form::label('start_date', __('Date'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false); ?>
+              <?php echo Form::label('date', __('Date'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false); ?>
 
               <div class="input-group date">
                 <div class="input-group-prepend"><span class="input-group-text"><span
                       class="fa fa-calendar"></span></span></div>
-                <?php echo Form::text('start_date',date('Y-m-d'),['class'=>'form-control','required','id'=>'start_date']); ?>
+                <?php echo Form::text('date',date('Y-m-d'),['class'=>'form-control','required','id'=>'start_date']); ?>
 
               </div>
+            </div>
+            <div class="form-group">
+              <?php echo Form::label(
+              'recipient',
+              __('Email Reminder Recipients') . ' <span class="text-danger">*</span>',
+              ['class' => 'form-label'],
+              false,
+              ); ?>
+
+              <select id="recipient" name="recipients[]" multiple="multiple" class="form-control">
+                <option value="">-</option>
+                <?php $__currentLoopData = $recipients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recipient): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($recipient->email); ?>"><?php echo e($recipient->email); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+              </select>
             </div>
             
           </div>
@@ -150,6 +164,9 @@
   $(document).ready(function() {
     $('#vehicle_id').select2({placeholder: "Select Fleet"});
     $('#parts_id').select2({placeholder: "Select Parts/Item"});
+    $('#recipient').select2({
+    placeholder: "Select Recipients"
+    });
 
     $('#vehicle_id').change(function() {
     var vehicleId = $(this).val();
@@ -160,10 +177,8 @@
     $.get(meterUrl, function(data) {
     if (data.start_meter) {
     $('input[name="start_meter"]').val(data.start_meter);
-    $('input[name="start_meter_display"]').val(data.start_meter);
     } else {
     $('input[name="start_meter"]').val(0); // Or any default value
-    $('input[name="start_meter_display"]').val(0); // Or any default value
     }
     });
     });
@@ -226,4 +241,4 @@
   });
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /var/www/html/whistler/framework/resources/views/service_reminder/create.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /var/www/html/whistler/framework/resources/views/preventive_maintenance/create.blade.php ENDPATH**/ ?>

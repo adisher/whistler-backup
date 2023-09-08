@@ -1928,10 +1928,13 @@ class ReportsController extends Controller
     {
         $siteId = $request->get('site_id');
         $shiftId = $request->get('shift_id');
+        $reportDate = $request->get('date');
+        // dd($siteId, $shiftId, $reportDate);
 
         $workOrders = WorkOrders::with('vehicle')
             ->where('site_id', $siteId)
             ->where('shift_id', $shiftId)
+            ->where('date', $reportDate)
             ->get();
 
         // dd($workOrders);

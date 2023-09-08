@@ -90,16 +90,20 @@
         </div>
         @endif
         <div class="row">
-          <div class="col-md-12">
-            {!! Form::label('description', __('fleet.description'), ['class' => 'col-md-2 control-label']) !!}
-
-            <div class="col-md-10">
-              {!! Form::textarea('description', null,['class' => 'form-control','required','rows'=>'3']) !!}
-              <br />
+          <div class="form-group col-md-6">
+            {!! Form::label('description', __('Service Title'), ['class' => 'form-label']) !!}
+            {!! Form::text('description', null,['class' => 'form-control','required', 'placeholder'=>'e.g. Engine Inspection']) !!}
+          </div>
+          <div class="form-group col-md-6">
+            {!! Form::label('meter_interval', __('Planned Meter Interval'), ['class' => 'form-label']) !!}
+            <div class="input-group date">
+              <div class="input-group-prepend"><span class="input-group-text">{{Hyvikk::get('dis_format')}}</span></div>
+              {!! Form::number('meter_interval',null,['class'=>'form-control','required','id'=>'start_date', 'min'=>'0',
+              'placeholder'=>'e.g. 250']) !!}
             </div>
           </div>
         </div>
-        <div class="row">
+        {{-- <div class="row">
           <div class="col-md-6">
             <div class="card card-default">
               <div class="card-header">
@@ -205,7 +209,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> --}}
         <div class="col-md-12">
           {!! Form::submit(__('fleet.save'), ['class' => 'btn btn-success']) !!}
         </div>

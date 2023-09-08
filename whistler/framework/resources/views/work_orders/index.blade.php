@@ -119,45 +119,49 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-info dropdown-toggle"
-                                                data-toggle="dropdown">
-                                                <span class="fa fa-gear"></span>
-                                                <span class="sr-only">Toggle Dropdown</span>
-                                            </button>
-                                            <div class="dropdown-menu custom" role="menu">
-                                                @can('WorkOrders edit')
-                                                    @if ($row->work_hours == 0 && $row->end_meter == null)
-                                                        <a class="dropdown-item close-shift" href="#"
-                                                            data-id="{{ $row->id }}"
-                                                            data-vehicle-id="{{ $row->vehicle->id }}"
-                                                            data-driver-id="{{ $row->driver_id }}"
-                                                            data-start-meter="{{ $row->start_meter }}">
-                                                            <span aria-hidden="true" class="fa fa-check-square"
-                                                                style="color: green;"></span> Close Shift
-                                                        </a>
-                                                    @endif
-
-                                                    <a class="dropdown-item"
-                                                        href='{{ url('admin/work_order/' . $row->id . '/edit') }}'> <span
-                                                            aria-hidden="true" class="fa fa-edit"
-                                                            style="color: #f0ad4e;"></span> @lang('fleet.edit')</a>
-                                                @endcan
-                                                @can('WorkOrders delete')
-                                                    <a class="dropdown-item" data-id="{{ $row->id }}" data-toggle="modal"
-                                                        data-target="#myModal"><span aria-hidden="true" class="fa fa-trash"
-                                                            style="color: #dd4b39"></span> @lang('fleet.delete')</a>
-                                                @endcan
+                                        <div class="d-flex align-items-stretch">
+                                            <div>
+                                                @if ($row->work_hours == 0 && $row->end_meter == null)
+                                                    <a class="btn btn-success close-shift" href="#"
+                                                        data-id="{{ $row->id }}"
+                                                        data-vehicle-id="{{ $row->vehicle->id }}"
+                                                        data-driver-id="{{ $row->driver_id }}"
+                                                        data-start-meter="{{ $row->start_meter }}"
+                                                        data-toggle="tooltip" title="Close Shift">
+                                                        <span class="fa fa-check-square fa-lg"></span>
+                                                    </a>
+                                                @endif
                                             </div>
+                                            <div class="btn-group ml-2">
+                                                <button type="button" class="btn btn-info dropdown-toggle"
+                                                    data-toggle="dropdown">
+                                                    <span class="fa fa-gear"></span>
+                                                    <span class="sr-only">Toggle Dropdown</span>
+                                                </button>
+                                                <div class="dropdown-menu custom" role="menu">
+                                                    @can('WorkOrders edit')
+                                                        <a class="dropdown-item"
+                                                            href='{{ url('admin/work_order/' . $row->id . '/edit') }}'> <span
+                                                                aria-hidden="true" class="fa fa-edit"
+                                                                style="color: #f0ad4e;"></span> @lang('fleet.edit')</a>
+                                                    @endcan
+                                                    @can('WorkOrders delete')
+                                                        <a class="dropdown-item" data-id="{{ $row->id }}"
+                                                            data-toggle="modal" data-target="#myModal"><span aria-hidden="true"
+                                                                class="fa fa-trash" style="color: #dd4b39"></span>
+                                                            @lang('fleet.delete')</a>
+                                                    @endcan
+                                                </div>
+                                            </div>
+                                            {!! Form::open([
+                                                'url' => 'admin/work_order/' . $row->id,
+                                                'method' => 'DELETE',
+                                                'class' => 'form-horizontal',
+                                                'id' => 'form_' . $row->id,
+                                            ]) !!}
+                                            {!! Form::hidden('id', $row->id) !!}
+                                            {!! Form::close() !!}
                                         </div>
-                                        {!! Form::open([
-                                            'url' => 'admin/work_order/' . $row->id,
-                                            'method' => 'DELETE',
-                                            'class' => 'form-horizontal',
-                                            'id' => 'form_' . $row->id,
-                                        ]) !!}
-                                        {!! Form::hidden('id', $row->id) !!}
-                                        {!! Form::close() !!}
                                     </td>
                                 </tr>
                             @endforeach
@@ -446,6 +450,9 @@
             }
         });
 
+        $(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
         // Checkbox checked
         function checkcheckbox() {
             // Total checkboxes

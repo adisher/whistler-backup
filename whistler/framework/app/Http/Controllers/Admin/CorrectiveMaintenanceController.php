@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Model\CorrectiveMaintenance;
+use App\Model\PartsModel;
 use App\Model\User;
 use App\Model\VehicleModel;
-use App\Model\CorrectiveMaintenance;
 use Auth;
 use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
 
 class CorrectiveMaintenanceController extends Controller
 {
@@ -32,7 +32,7 @@ class CorrectiveMaintenanceController extends Controller
         if ($request->ajax()) {
 
             $user = Auth::user();
-                $maintenance = CorrectiveMaintenance::select('corrective_maintenance.*')->with(['vehicle.makeModel']);
+            $maintenance = CorrectiveMaintenance::select('corrective_maintenance.*')->with(['vehicle.makeModel', 'parts']);
 
             return DataTables::eloquent($maintenance)
                 ->addColumn('check', function ($maint) {
@@ -43,15 +43,20 @@ class CorrectiveMaintenanceController extends Controller
                     return $maint->id;
                 })
                 ->addColumn('vehicle_id', function ($maint) {
-                    return ($maint) 
-                        ? $maint->vehicle->vehicleData->make. ' - '  .$maint->vehicle->vehicleData->model. ' - '  .$maint->vehicle->license_plate // adjust this line to the actual field name in VehicleData
-                        : '';
+                    return ($maint)
+                    ? $maint->vehicle->vehicleData->make . '' . $maint->vehicle->vehicleData->model . ' - ' . $maint->vehicle->license_plate
+                    : '';
+                })
+                ->addColumn('parts_id', function ($maint) {
+                    return ($maint->parts)
+                    ? $maint->parts->title . '<br/><strong>Vendor: </strong>' . $maint->parts->vendor->name
+                    : '';
                 })
                 ->addColumn('action', function ($maint) {
                     return view('maintenance.list-actions', ['row' => $maint]);
                 })
                 ->addIndexColumn()
-                ->rawColumns(['action', 'check'])
+                ->rawColumns(['action', 'check', 'parts_id'])
                 ->make(true);
             //return datatables(User::all())->toJson();
 
@@ -67,10 +72,8 @@ class CorrectiveMaintenanceController extends Controller
     {
         // $vehicle = VehicleData::all();
         $vehicles = VehicleModel::with('vehicleData')->get();
-        // $drivers = User::where('group_id', null)
-        //     ->where('user_type', 'D')
-        //     ->get();
-        return view("maintenance.create", compact('vehicles'));
+        $parts = PartsModel::with(['vendor', 'category'])->orderBy('id', 'desc')->get();
+        return view("maintenance.create", compact('vehicles', 'parts'));
     }
 
     /**
@@ -83,9 +86,15 @@ class CorrectiveMaintenanceController extends Controller
     {
         // dd($request->all());
 
+        $part_id = $request->get("parts_id");
+        $qty = $request->get("quantity");
         $maintenance = CorrectiveMaintenance::create([
             'vehicle_id' => $request->get("vehicle_id"),
             'subject' => $request->get("subject"),
+            'parts_id' => $request->get("parts_id"),
+            'meter' => $request->get("meter"),
+            'quantity' => $request->get("quantity"),
+            'price' => $request->get("price"),
             'description' => $request->get("description") ?? 'N/A',
             'date' => $request->get('date'),
             'deleted_at' => null,
@@ -103,7 +112,21 @@ class CorrectiveMaintenanceController extends Controller
         }
         $maintenance->save();
 
+        $update_part = PartsModel::find($part_id);
+        $update_part->stock = $update_part->stock - $qty;
+        $update_part->save();
+        if ($update_part->stock == 0) {
+            $update_part->availability = 0;
+            $update_part->save();
+        }
+
         return redirect()->route('maintenance.index');
+    }
+
+    public function get_unit_cost($id)
+    {
+        $part = PartsModel::find($id);
+        return response()->json($part->unit_cost);
     }
 
     /**

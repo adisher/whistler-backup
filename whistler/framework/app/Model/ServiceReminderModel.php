@@ -21,7 +21,7 @@ class ServiceReminderModel extends Model
     use SoftDeletes;
     protected $dates = ['deleted_at'];
     protected $table = "service_reminder";
-    protected $fillable = ['vehicle_id', 'service_id', 'last_date', 'last_meter', 'user_id'];
+    protected $fillable = ['maintenance_id', 'last_date', 'last_meter', 'user_id'];
 
     public function services()
     {
@@ -30,5 +30,9 @@ class ServiceReminderModel extends Model
 
     public function vehicle() {
         return $this->belongsTo("App\Model\VehicleModel", "vehicle_id", "id")->with('vehicleData')->withTrashed();
+    }
+
+    public function preventive_maintenance() {
+        return $this->belongsTo("App\Model\PreventiveMaintenanceModel", "maintenance_id", "id")->withTrashed();
     }
 }

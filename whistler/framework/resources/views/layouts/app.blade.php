@@ -774,7 +774,9 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>  -->
                             Request::is('admin/vehicle-model*') ||
                             Request::is('admin/vehicle-color*') ||
                             Request::is('admin/maintenance*') ||
-                            Request::is('admin/service-reminder*') || Request::is('admin/service-item*'))
+                            Request::is('admin/service-reminder*') || 
+                            Request::is('admin/service-item*') ||
+                            Request::is('admin/preventive-maintenance*'))
                             @php($class = 'menu-open')
                             @php($active = 'active')
                             @else
@@ -849,19 +851,76 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>  -->
                                         </a>
                                     </li>
                                     @endcan
-                                    @if (Request::is('admin/service-reminder*') || Request::is('admin/service-item*'))
-                                    @php($class = 'menu-open')
-                                    @php($active = 'active')
+                                    @if (Request::is('admin/preventive-maintenance*') || Request::is('admin/service-item*'))
+                                    @php($class_pm = 'menu-open')
+                                    @php($active_pm = 'active')
                                     @else
-                                    @php($class = '')
-                                    @php($active = '')
+                                    @php($class_pm = '')
+                                    @php($active_pm = '')
                                     @endif
+                                    
+                                    @if (Request::is('admin/service-reminder*') || Request::is('admin/service-item*'))
+                                    @php($class_sr = 'menu-open')
+                                    @php($active_sr = 'active')
+                                    @else
+                                    @php($class_sr = '')
+                                    @php($active_sr = '')
+                                    @endif
+                                    
                                     @canany(['ServiceReminders list', 'ServiceReminders add', 'ServiceItems list'])
-                                    <li class="nav-item has-treeview {{ $class }}">
-                                        <a href="#" class="nav-link {{ $active }}">
+                                    <!-- Preventive Maintenance Tree -->
+                                    <li class="nav-item has-treeview {{ $class_pm }}">
+                                        <a href="#" class="nav-link {{ $active_pm }}">
                                             <i class="nav-icon fa fa-clock-rotate-left"></i>
                                             <p>
                                                 Preventive Maintenance
+                                                <i class="right fa fa-angle-left"></i>
+                                            </p>
+                                        </a>
+                                        <ul class="nav nav-treeview">
+                                            @can('ServiceReminders list')
+                                            <li class="nav-item">
+                                                <a href="{{ route('preventive-maintenance.index') }}"
+                                                    class="nav-link @if (Request::is('admin/preventive-maintenance')) active @endif">
+                                                    <i class="fa fa-arrows-alt nav-icon"></i>
+                                                    <p>Manage Maintenance</p>
+                                                </a>
+                                            </li>
+                                            @endcan
+                                            @can('ServiceReminders add')
+                                            <li class="nav-item">
+                                                <a href="{{ route('preventive-maintenance.create') }}"
+                                                    class="nav-link @if (Request::is('admin/preventive-maintenance/create')) active @endif">
+                                                    <i class="fa fa-check-square nav-icon"></i>
+                                                    <p>Add Maintenance</p>
+                                                </a>
+                                            </li>
+                                            @endcan
+                                            @can('ServiceReminders list')
+                                            <li class="nav-item">
+                                                <a href="{{ url('admin/preventive_maintenance/logs') }}"
+                                                    class="nav-link @if (Request::is('admin/preventive-maintenance')) active @endif">
+                                                    <i class="fa fa-arrows-alt nav-icon"></i>
+                                                    <p>Maintenance History</p>
+                                                </a>
+                                            </li>
+                                            @endcan
+                                            @can('ServiceItems list')
+                                            <li class="nav-item">
+                                                <a href="{{ route('service-item.index') }}" class="nav-link @if (Request::is('admin/service-item*')) active @endif">
+                                                    <i class="fa fa-warning nav-icon"></i>
+                                                    <p>@lang('fleet.service_item')</p>
+                                                </a>
+                                            </li>
+                                            @endcan
+                                        </ul>
+                                    </li>
+                                    <!-- Service Reminders and Items Tree -->
+                                    <li class="nav-item has-treeview {{ $class_sr }}">
+                                        <a href="#" class="nav-link {{ $active_sr }}">
+                                            <i class="nav-icon fa fa-clock-rotate-left"></i>
+                                            <p>
+                                                Service Reminders
                                                 <i class="right fa fa-angle-left"></i>
                                             </p>
                                         </a>
@@ -881,15 +940,6 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>  -->
                                                     class="nav-link @if (Request::is('admin/service-reminder/create')) active @endif">
                                                     <i class="fa fa-check-square nav-icon"></i>
                                                     <p>@lang('fleet.add_service_reminder')</p>
-                                                </a>
-                                            </li>
-                                            @endcan
-                                            @can('ServiceItems list')
-                                            <li class="nav-item">
-                                                <a href="{{ route('service-item.index') }}"
-                                                    class="nav-link @if (Request::is('admin/service-item*')) active @endif">
-                                                    <i class="fa fa-warning nav-icon"></i>
-                                                    <p>@lang('fleet.service_item')</p>
                                                 </a>
                                             </li>
                                             @endcan

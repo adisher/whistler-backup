@@ -58,7 +58,8 @@
                                 <select id="vehicle_id" name="vehicle_id" class="form-control" required>
                                     <option value="">-</option>
                                     <?php $__currentLoopData = $vehicles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehicle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <option value="<?php echo e($vehicle->id); ?>" <?php echo e(in_array($vehicle->id, $open_shift) ? 'disabled' : ''); ?>>
+                                        <option value="<?php echo e($vehicle->id); ?>"
+                                            <?php echo e(in_array($vehicle->id, $open_shift) ? 'disabled' : ''); ?>>
                                             <?php echo e($vehicle->vehicleData->make); ?> -
                                             <?php echo e($vehicle->vehicleData->model); ?> -
                                             <?php echo e($vehicle->license_plate); ?>
@@ -144,28 +145,13 @@
                                 <?php echo Form::text('start_meter', null, ['class' => 'form-control', 'required']); ?>
 
                             </div>
-                            <div class="form-group">
-                                <?php echo Form::label('end_meter', __('End Meter'), ['class' => 'form-label'], false); ?>
-
-                                <?php echo Form::text('end_meter', null, ['class' => 'form-control']); ?>
-
-                            </div>
-                            <div class="form-group" id="work_hours_div">
-                                <?php echo Form::label('work_hours', __('Work Hours'), ['class' => 'form-label'], false); ?>
-
-                                <?php echo Form::number('work_hours', null, ['class' => 'form-control']); ?>
-
-                            </div>
+                            
+                            
                         </div>
                         <input type="hidden" name="expense_amount" id="expense_amount" value="0">
 
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <?php echo Form::label('price', __('Cost'), ['class' => 'form-label']); ?>
-
-                                <?php echo Form::number('price', null, ['class' => 'form-control', 'readonly']); ?>
-
-                            </div>
+                            
                             <div class="form-group">
                                 <?php echo Form::label('description', __('Description'), ['class' => 'form-label']); ?>
 
@@ -236,6 +222,17 @@
                         $('input[name="price"]').val(cost);
                     } else {
                         $('input[name="price"]').val(0);
+                    }
+                });
+
+                // Fetch start_meter data for the selected vehicle
+                var meterUrl = "<?php echo e(route('vehicles.getMeter', ['id' => ':id'])); ?>".replace(':id',
+                    vehicleId);
+                $.get(meterUrl, function(data) {
+                    if (data.start_meter) {
+                        $('input[name="start_meter"]').val(data.start_meter);
+                    } else {
+                        $('input[name="start_meter"]').val(0); // Or any default value
                     }
                 });
             });

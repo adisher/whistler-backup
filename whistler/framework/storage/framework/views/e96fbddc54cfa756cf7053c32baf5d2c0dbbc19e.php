@@ -91,124 +91,24 @@
         </div>
         <?php endif; ?>
         <div class="row">
-          <div class="col-md-12">
-            <?php echo Form::label('description', __('fleet.description'), ['class' => 'col-md-2 control-label']); ?>
+          <div class="form-group col-md-6">
+            <?php echo Form::label('description', __('Service Title'), ['class' => 'form-label']); ?>
 
+            <?php echo Form::text('description', null,['class' => 'form-control','required', 'placeholder'=>'e.g. Engine Inspection']); ?>
 
-            <div class="col-md-10">
-              <?php echo Form::textarea('description', null,['class' => 'form-control','required','rows'=>'3']); ?>
+          </div>
+          <div class="form-group col-md-6">
+            <?php echo Form::label('meter_interval', __('Planned Meter Interval'), ['class' => 'form-label']); ?>
 
-              <br />
+            <div class="input-group date">
+              <div class="input-group-prepend"><span class="input-group-text"><?php echo e(Hyvikk::get('dis_format')); ?></span></div>
+              <?php echo Form::number('meter_interval',null,['class'=>'form-control','required','id'=>'start_date', 'min'=>'0',
+              'placeholder'=>'e.g. 250']); ?>
+
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="card card-default">
-              <div class="card-header">
-                <h3 class="card-title">
-                  "<?php echo app('translator')->get('fleet.overdue'); ?>" <?php echo app('translator')->get('fleet.reminder_settings'); ?>
-                </h3>
-              </div>
-              <div class="card-body">
-                <?php echo app('translator')->get('fleet.time_interval'); ?>
-                <div class="row" style="margin-top: 10px;">
-                  <div class="col-md-3 col-xs-4">
-                    <label class="switch">
-                      <input type="checkbox" name="chk1" id="chk1">
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
-                  <div class="form-group col-md-3 col-xs-4">
-                    <input type="number" name="time1" class="form-control" id="time1">
-                  </div>
-                  <div class="col-md-4  col-xs-4">
-                    <select id="interval" name="interval1" class="form-control">
-                      <option value="day(s)"> <?php echo app('translator')->get('fleet.days'); ?></option>
-                      <option value="week(s)"> <?php echo app('translator')->get('fleet.weeks'); ?></option>
-                      <option value="month(s)"> <?php echo app('translator')->get('fleet.months'); ?></option>
-                      <option value="year(s)"> <?php echo app('translator')->get('fleet.years'); ?></option>
-                    </select>
-                  </div>
-                </div>
-                <br>
-                <?php echo app('translator')->get('fleet.meter_interval'); ?>
-                <div class="row" style="margin-top: 10px;">
-                  <div class="col-md-3">
-                    <label class="switch">
-                      <input type="checkbox" name="chk2" id="chk2">
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
-                  <div class="form-group col-md-4">
-                    <div class="input-group mb-3">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text"><?php echo e(Hyvikk::get('dis_format')); ?></span>
-                      </div>
-                      <input type="number" name="meter1" class="form-control" id="meter1">
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="card card-default">
-              <div class="card-header">
-                <h3 class="card-title">
-                  "<?php echo app('translator')->get('fleet.due_soon'); ?>" <?php echo app('translator')->get('fleet.reminder_settings'); ?>
-                </h3>
-              </div>
-              <div class="card-body">
-                <?php echo app('translator')->get('fleet.show_reminder_time'); ?>
-                <div class="row" style="margin-top: 10px;">
-                  <div class="col-md-3">
-                    <label class="switch">
-                      <input type="checkbox" name="chk3" id="chk3">
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
-                  <div class="form-group col-md-3">
-                    <input type="number" name="time2" class="form-control" id="time2">
-                  </div>
-                  <div class="col-md-4">
-                    <select id="interval" name="interval2" class="form-control">
-                      <option value="day(s)"> <?php echo app('translator')->get('fleet.days'); ?></option>
-                      <option value="week(s)"> <?php echo app('translator')->get('fleet.weeks'); ?></option>
-                      <option value="month(s)"> <?php echo app('translator')->get('fleet.months'); ?></option>
-                      <option value="year(s)"> <?php echo app('translator')->get('fleet.years'); ?></option>
-                    </select>
-                  </div>
-                </div>
-
-                <br>
-                <?php echo app('translator')->get('fleet.show_reminder_meter'); ?>
-
-                <div class="row" style="margin-top: 10px;">
-                  <div class="col-md-3">
-                    <label class="switch">
-                      <input type="checkbox" name="chk4" id="chk4">
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
-                  <div class="form-group col-md-4">
-                    <div class="input-group mb-3">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text"><?php echo e(Hyvikk::get('dis_format')); ?></span>
-                      </div>
-                      <input type="number" name="meter2" class="form-control" id="meter2">
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
         <div class="col-md-12">
           <?php echo Form::submit(__('fleet.save'), ['class' => 'btn btn-success']); ?>
 

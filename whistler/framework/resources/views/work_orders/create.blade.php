@@ -53,7 +53,8 @@
                                 <select id="vehicle_id" name="vehicle_id" class="form-control" required>
                                     <option value="">-</option>
                                     @foreach ($vehicles as $vehicle)
-                                        <option value="{{ $vehicle->id }}" {{ in_array($vehicle->id, $open_shift) ? 'disabled' : '' }}>
+                                        <option value="{{ $vehicle->id }}"
+                                            {{ in_array($vehicle->id, $open_shift) ? 'disabled' : '' }}>
                                             {{ $vehicle->vehicleData->make }} -
                                             {{ $vehicle->vehicleData->model }} -
                                             {{ $vehicle->license_plate }}
@@ -130,22 +131,22 @@
                                 ) !!}
                                 {!! Form::text('start_meter', null, ['class' => 'form-control', 'required']) !!}
                             </div>
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 {!! Form::label('end_meter', __('End Meter'), ['class' => 'form-label'], false) !!}
                                 {!! Form::text('end_meter', null, ['class' => 'form-control']) !!}
-                            </div>
-                            <div class="form-group" id="work_hours_div">
+                            </div> --}}
+                            {{-- <div class="form-group" id="work_hours_div">
                                 {!! Form::label('work_hours', __('Work Hours'), ['class' => 'form-label'], false) !!}
                                 {!! Form::number('work_hours', null, ['class' => 'form-control']) !!}
-                            </div>
+                            </div> --}}
                         </div>
                         <input type="hidden" name="expense_amount" id="expense_amount" value="0">
 
                         <div class="col-md-6">
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 {!! Form::label('price', __('Cost'), ['class' => 'form-label']) !!}
                                 {!! Form::number('price', null, ['class' => 'form-control', 'readonly']) !!}
-                            </div>
+                            </div> --}}
                             <div class="form-group">
                                 {!! Form::label('description', __('Description'), ['class' => 'form-label']) !!}
                                 {!! Form::textarea('description', null, ['class' => 'form-control']) !!}
@@ -213,6 +214,17 @@
                         $('input[name="price"]').val(cost);
                     } else {
                         $('input[name="price"]').val(0);
+                    }
+                });
+
+                // Fetch start_meter data for the selected vehicle
+                var meterUrl = "{{ route('vehicles.getMeter', ['id' => ':id']) }}".replace(':id',
+                    vehicleId);
+                $.get(meterUrl, function(data) {
+                    if (data.start_meter) {
+                        $('input[name="start_meter"]').val(data.start_meter);
+                    } else {
+                        $('input[name="start_meter"]').val(0); // Or any default value
                     }
                 });
             });

@@ -764,7 +764,9 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>  -->
                             Request::is('admin/vehicle-model*') ||
                             Request::is('admin/vehicle-color*') ||
                             Request::is('admin/maintenance*') ||
-                            Request::is('admin/service-reminder*') || Request::is('admin/service-item*')): ?>
+                            Request::is('admin/service-reminder*') || 
+                            Request::is('admin/service-item*') ||
+                            Request::is('admin/preventive-maintenance*')): ?>
                             <?php ($class = 'menu-open'); ?>
                             <?php ($active = 'active'); ?>
                             <?php else: ?>
@@ -839,19 +841,76 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>  -->
                                         </a>
                                     </li>
                                     <?php endif; ?>
-                                    <?php if(Request::is('admin/service-reminder*') || Request::is('admin/service-item*')): ?>
-                                    <?php ($class = 'menu-open'); ?>
-                                    <?php ($active = 'active'); ?>
+                                    <?php if(Request::is('admin/preventive-maintenance*') || Request::is('admin/service-item*')): ?>
+                                    <?php ($class_pm = 'menu-open'); ?>
+                                    <?php ($active_pm = 'active'); ?>
                                     <?php else: ?>
-                                    <?php ($class = ''); ?>
-                                    <?php ($active = ''); ?>
+                                    <?php ($class_pm = ''); ?>
+                                    <?php ($active_pm = ''); ?>
                                     <?php endif; ?>
+                                    
+                                    <?php if(Request::is('admin/service-reminder*') || Request::is('admin/service-item*')): ?>
+                                    <?php ($class_sr = 'menu-open'); ?>
+                                    <?php ($active_sr = 'active'); ?>
+                                    <?php else: ?>
+                                    <?php ($class_sr = ''); ?>
+                                    <?php ($active_sr = ''); ?>
+                                    <?php endif; ?>
+                                    
                                     <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['ServiceReminders list', 'ServiceReminders add', 'ServiceItems list'])): ?>
-                                    <li class="nav-item has-treeview <?php echo e($class); ?>">
-                                        <a href="#" class="nav-link <?php echo e($active); ?>">
+                                    <!-- Preventive Maintenance Tree -->
+                                    <li class="nav-item has-treeview <?php echo e($class_pm); ?>">
+                                        <a href="#" class="nav-link <?php echo e($active_pm); ?>">
                                             <i class="nav-icon fa fa-clock-rotate-left"></i>
                                             <p>
                                                 Preventive Maintenance
+                                                <i class="right fa fa-angle-left"></i>
+                                            </p>
+                                        </a>
+                                        <ul class="nav nav-treeview">
+                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders list')): ?>
+                                            <li class="nav-item">
+                                                <a href="<?php echo e(route('preventive-maintenance.index')); ?>"
+                                                    class="nav-link <?php if(Request::is('admin/preventive-maintenance')): ?> active <?php endif; ?>">
+                                                    <i class="fa fa-arrows-alt nav-icon"></i>
+                                                    <p>Manage Maintenance</p>
+                                                </a>
+                                            </li>
+                                            <?php endif; ?>
+                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders add')): ?>
+                                            <li class="nav-item">
+                                                <a href="<?php echo e(route('preventive-maintenance.create')); ?>"
+                                                    class="nav-link <?php if(Request::is('admin/preventive-maintenance/create')): ?> active <?php endif; ?>">
+                                                    <i class="fa fa-check-square nav-icon"></i>
+                                                    <p>Add Maintenance</p>
+                                                </a>
+                                            </li>
+                                            <?php endif; ?>
+                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders list')): ?>
+                                            <li class="nav-item">
+                                                <a href="<?php echo e(url('admin/preventive_maintenance/logs')); ?>"
+                                                    class="nav-link <?php if(Request::is('admin/preventive-maintenance')): ?> active <?php endif; ?>">
+                                                    <i class="fa fa-arrows-alt nav-icon"></i>
+                                                    <p>Maintenance History</p>
+                                                </a>
+                                            </li>
+                                            <?php endif; ?>
+                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems list')): ?>
+                                            <li class="nav-item">
+                                                <a href="<?php echo e(route('service-item.index')); ?>" class="nav-link <?php if(Request::is('admin/service-item*')): ?> active <?php endif; ?>">
+                                                    <i class="fa fa-warning nav-icon"></i>
+                                                    <p><?php echo app('translator')->get('fleet.service_item'); ?></p>
+                                                </a>
+                                            </li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </li>
+                                    <!-- Service Reminders and Items Tree -->
+                                    <li class="nav-item has-treeview <?php echo e($class_sr); ?>">
+                                        <a href="#" class="nav-link <?php echo e($active_sr); ?>">
+                                            <i class="nav-icon fa fa-clock-rotate-left"></i>
+                                            <p>
+                                                Service Reminders
                                                 <i class="right fa fa-angle-left"></i>
                                             </p>
                                         </a>
@@ -871,15 +930,6 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>  -->
                                                     class="nav-link <?php if(Request::is('admin/service-reminder/create')): ?> active <?php endif; ?>">
                                                     <i class="fa fa-check-square nav-icon"></i>
                                                     <p><?php echo app('translator')->get('fleet.add_service_reminder'); ?></p>
-                                                </a>
-                                            </li>
-                                            <?php endif; ?>
-                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems list')): ?>
-                                            <li class="nav-item">
-                                                <a href="<?php echo e(route('service-item.index')); ?>"
-                                                    class="nav-link <?php if(Request::is('admin/service-item*')): ?> active <?php endif; ?>">
-                                                    <i class="fa fa-warning nav-icon"></i>
-                                                    <p><?php echo app('translator')->get('fleet.service_item'); ?></p>
                                                 </a>
                                             </li>
                                             <?php endif; ?>

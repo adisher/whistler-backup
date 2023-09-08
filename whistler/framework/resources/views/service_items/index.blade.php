@@ -18,7 +18,7 @@
         <h3 class="card-title">
         @lang('fleet.serviceItems')
         &nbsp;
-        @can('ServiceItems add')<a href="{{ route('service-item.create')}}" class="btn btn-success">@lang('fleet.add_service_item')</a>@endcan</h3>
+        @can('ServiceItems add')<a href="{{ route('service-item.create')}}" class="btn btn-success"><i class="fa fa-plus"></i></a>@endcan</h3>
       </div>
 
       <div class="card-body table-responsive">
@@ -31,14 +31,13 @@
                 @endif
               </th>
               <th>@lang('fleet.description')</th>
-              <th>@lang('fleet.service_interval')</th>
-              <th>@lang('fleet.create_reminder')</th>
+              <th>Planned Meter Interval (kms)</th>
               <th>@lang('fleet.action')</th>
             </tr>
           </thead>
           <tbody>
           @foreach($services as $service)
-            <tr>
+            {{-- <tr>
               <td>
                 <input type="checkbox" name="ids[]" value="{{ $service->id }}" class="checkbox" id="chk{{ $service->id }}" onclick='checkcheckbox();'>
               </td>
@@ -54,6 +53,9 @@
               <td>
                 @if($service->duesoon_time != null)
                   {{$service->duesoon_time}} {{$service->duesoon_unit}} @lang('fleet.before_due')
+                @endif
+                @if($service->duesoon_meter != null)
+                  @lang('fleet.or') {{$service->duesoon_meter}} {{Hyvikk::get('dis_format')}}
                 @endif
               </td>
               <td>
@@ -71,6 +73,37 @@
               {!! Form::hidden("id",$service->id) !!}
               {!! Form::close() !!}
               </td>
+            </tr> --}}
+            <tr>
+              <td>
+                <input type="checkbox" name="ids[]" value="{{ $service->id }}" class="checkbox" id="chk{{ $service->id }}"
+                  onclick='checkcheckbox();'>
+              </td>
+              <td>
+                {{$service->description}}
+              </td>
+              <td>
+                {{$service->meter_interval}}
+              </td>
+              <td>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                    <span class="fa fa-gear"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu custom" role="menu">
+                    @can('ServiceItems edit')<a class="dropdown-item" href="{{ url("admin/service-item/".$service->id."/edit")}}">
+                      <span aria-hidden="true" class="fa fa-edit" style="color: #f0ad4e;"></span> @lang('fleet.edit')</a>@endcan
+                    @can('ServiceItems delete')<a class="dropdown-item" data-id="{{$service->id}}" data-toggle="modal"
+                      data-target="#myModal"> <span aria-hidden="true" class="fa fa-trash" style="color: #dd4b39"></span>
+                      @lang('fleet.delete')</a>@endcan
+                  </div>
+                </div>
+                {!! Form::open(['url' =>
+                'admin/service-item/'.$service->id,'method'=>'DELETE','class'=>'form-horizontal','id'=>'form_'.$service->id]) !!}
+                {!! Form::hidden("id",$service->id) !!}
+                {!! Form::close() !!}
+              </td>
             </tr>
           @endforeach
           </tbody>
@@ -82,8 +115,7 @@
                 @endif
               </th>
               <th>@lang('fleet.description')</th>
-              <th>@lang('fleet.service_interval')</th>
-              <th>@lang('fleet.create_reminder')</th>
+              <th>Planned Meter Interval (kms)</th>
               <th>@lang('fleet.action')</th>
             </tr>
           </tfoot>

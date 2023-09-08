@@ -16,8 +16,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ServiceReminder;
 use App\Model\ServiceItemsModel;
 use App\Model\ServiceReminderModel;
+use App\Model\PreventiveMaintenanceModel;
 use App\Model\User;
 use App\Model\VehicleModel;
+use App\Model\PartsModel;
 use App\Model\VehicleData;
 use Auth;
 use Illuminate\Http\Request;
@@ -36,26 +38,27 @@ class ServiceReminderController extends Controller
 
     public function index()
     {
-            $vehicle_ids = VehicleData::pluck('id')->toArray();
+            // $vehicle_ids = VehicleData::pluck('id')->toArray();
             // $vehicle_ids = VehicleData::where('group_id', Auth::user()->group_id)->pluck('id')->toArray();
-        $data['service_reminder'] = ServiceReminderModel::whereIn('id', $vehicle_ids)->get();
+        $data['service_reminder'] = ServiceReminderModel::with('services', 'preventive_maintenance')->get();
+        // dd($data['service_reminder']);
         return view('service_reminder.index', $data);
     }
 
     public function create()
     {
         $data['services'] = ServiceItemsModel::get();
-        if (Auth::user()->group_id == null || Auth::user()->user_type == "S") {
-            $data['vehicles'] = VehicleData::all();
-        } else {
-            $data['vehicles'] = VehicleData::all();
-        }
+        $data['vehicles'] = VehicleModel::with('vehicleData')->get();
+        $data['parts'] = PartsModel::with(['vendor', 'category'])->orderBy('id', 'desc')->get();
+
         return view('service_reminder.create', $data);
     }
 
     public function store(ServiceReminder $request)
     {
+        dd($request->all());
         $users = User::where('user_type', 'S')->get();
+       
         foreach ($request->get('chk') as $item) {
 
             $history = ServiceReminderModel::whereVehicleId($request->get('vehicle_id'))->where('service_id', $item)->orderBy('id', 'desc')->first();
@@ -81,6 +84,9 @@ class ServiceReminderController extends Controller
             $reminder->last_meter = $last_meter;
             $reminder->user_id = Auth::user()->id;
             $reminder->save();
+
+            $preventive_maintenance = PreventiveMaintenanceModel::find($reminder->id);
+
 
         }
 

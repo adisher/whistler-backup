@@ -27,6 +27,30 @@
             width: 20px;
             height: 20px;
         }
+
+        /* Custom modal size */
+        .modal-xxl {
+            max-width: 1200px;
+        }
+
+        /* Responsive modal size */
+        @media (max-width: 1200px) {
+            .modal-xxl {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .modal-xxl {
+                max-width: 80%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modal-xxl {
+                max-width: 100%;
+            }
+        }
     </style>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('breadcrumb'); ?>
@@ -186,7 +210,7 @@
     <!-- Report View Modal -->
     <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-dialog modal-xxl" role="document">
             <div class="modal-content">
                 <div class="modal-body">
                     
@@ -690,7 +714,7 @@
                     });
                 }
 
-                if(shiftDetailsCheck){
+                if (shiftDetailsCheck) {
                     config.push({
                         title: 'Shift Details',
                         colspan: 6
@@ -756,7 +780,8 @@
 
                             var shiftDetailsCheck = response.shift_checked == "true";
 
-                            var headersConfig = generateHeadersConfig(fleetCheck, correctiveMaintenance, shiftDetailsCheck);
+                            var headersConfig = generateHeadersConfig(fleetCheck,
+                                correctiveMaintenance, shiftDetailsCheck);
 
                             function groupShiftDetails(shiftDetails) {
                                 var groupedDetails = {};
@@ -808,7 +833,7 @@
                                     headerRow2.append('<th>Site</th>');
                                     headerRow2.append('<th>Shift</th>');
                                     if (fleetCheck) {
-                                        headerRow2.append('<th>Driver</th>');
+                                        headerRow2.append('<th>Driver/Operator</th>');
                                         headerRow2.append('<th>Meter</th>');
                                         headerRow2.append('<th>Work Hrs</th>');
                                     }
@@ -826,7 +851,7 @@
                                     headerRow2.append('<th>Wastage (grams)</th>');
                                     headerRow2.append(
                                         '<th>Yield Quality (carats)</th>');
-                                } else if(header.title === 'Corrective Maintenance') {
+                                } else if (header.title === 'Corrective Maintenance') {
                                     headerRow2.append('<th>Subject</th>');
                                     headerRow2.append('<th>Description</th>');
                                 }
@@ -905,7 +930,10 @@
                                                     1 ?
                                                     'Morning' :
                                                     'Evening'; // Shift handling
-                                                var driver = item.assigned_driver.name;
+                                                var driver =
+                                                    item
+                                                    .assigned_driver
+                                                    .name;
                                                 var workHours =
                                                     item
                                                     .work_hours;
@@ -1073,7 +1101,7 @@
                             if (response.rental_checked == 'true' && fleetCheck) {
                                 var totalRow = $('<tr></tr>');
                                 totalRow.append(
-                                    '<td colspan="6">Total Rental Cost</td>'); // Adjust colspan
+                                    '<td colspan="7">Total Rental Cost</td>'); // Adjust colspan
                                 totalRow.append($('<td></td>').text('$' + totalRentalCost
                                     .toFixed(2))); // Format total
                                 tbody.append(totalRow); // Append total row to the table (3)

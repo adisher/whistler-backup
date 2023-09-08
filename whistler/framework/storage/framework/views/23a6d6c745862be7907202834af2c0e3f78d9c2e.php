@@ -5,7 +5,8 @@
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('extra_css'); ?>
 <style type="text/css">
-  .checkbox, #chk_all{
+  .checkbox,
+  #chk_all {
     width: 20px;
     height: 20px;
   }
@@ -17,10 +18,13 @@
     <div class="card card-info">
       <div class="card-header">
         <h3 class="card-title">
-        <?php echo app('translator')->get('fleet.serviceReminders'); ?>
-        &nbsp;
-        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders add')): ?><a href="<?php echo e(route('service-reminder.create')); ?>" class="btn btn-success" style="margin-bottom: 5px" title="<?php echo app('translator')->get('fleet.add_service_reminder'); ?>"><i class="fa fa-plus"></i></a><?php endif; ?> &nbsp;
-        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems add')): ?><a href="<?php echo e(route('service-item.create')); ?>" class="btn btn-success" style="margin-bottom: 5px"><?php echo app('translator')->get('fleet.add_service_item'); ?></a></h3><?php endif; ?>
+          <?php echo app('translator')->get('fleet.serviceReminders'); ?>
+          &nbsp;
+          <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders add')): ?><a href="<?php echo e(route('service-reminder.create')); ?>" class="btn btn-success"
+            style="margin-bottom: 5px" title="<?php echo app('translator')->get('fleet.add_service_reminder'); ?>"><i class="fa fa-plus"></i></a><?php endif; ?>
+          &nbsp;
+          <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceItems add')): ?><a href="<?php echo e(route('service-item.create')); ?>" class="btn btn-success"
+            style="margin-bottom: 5px"><?php echo app('translator')->get('fleet.add_service_item'); ?></a></h3><?php endif; ?>
       </div>
 
       <div class="card-body table-responsive">
@@ -29,86 +33,60 @@
             <tr>
               <th>
                 <?php if($service_reminder->count() > 0): ?>
-                  <input type="checkbox" id="chk_all">
+                <input type="checkbox" id="chk_all">
                 <?php endif; ?>
               </th>
               <th></th>
               <th>Fleet</th>
               <th><?php echo app('translator')->get('fleet.service_item'); ?></th>
-              <th><?php echo app('translator')->get('fleet.start_date'); ?></th>
-              <th><?php echo app('translator')->get('fleet.next_due'); ?> (<?php echo app('translator')->get('fleet.date'); ?>)</th>
-              
-              <th><?php echo app('translator')->get('fleet.action'); ?></th>
+              <th>Last Generated</th>
+              <th>Last Meter Reading</th>
+              <th>Planned at</th>
+              <th>Email to</th>
             </tr>
           </thead>
           <tbody>
             <?php $__currentLoopData = $service_reminder; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reminder): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <tr>
               <td>
-                <input type="checkbox" name="ids[]" value="<?php echo e($reminder->id); ?>" class="checkbox" id="chk<?php echo e($reminder->id); ?>" onclick='checkcheckbox();'>
+                <input type="checkbox" name="ids[]" value="<?php echo e($reminder->id); ?>" class="checkbox"
+                  id="chk<?php echo e($reminder->id); ?>" onclick='checkcheckbox();'>
               </td>
               <td>
-                 <?php if($reminder->vehicle['vehicle_image'] != null): ?>
-                  <img src="<?php echo e(asset('uploads/'.$reminder->vehicle['vehicle_image'])); ?>" height="70px" width="70px">
-                  <?php else: ?>
-                <img src="<?php echo e(asset("assets/images/vehicle.jpeg")); ?>" height="70px" width="70px">
-                <?php endif; ?>
-              </td>
-              <td>
-                <?php echo e($reminder->vehicle->make); ?> <?php echo e($reminder->vehicle->model); ?>
-
-              </td>
-              <td>
-                <?php echo e($reminder->services['description']); ?>
-
-                <br>
-                <?php echo app('translator')->get('fleet.interval'); ?>: <?php echo e($reminder->services->overdue_time); ?> <?php echo e($reminder->services->overdue_unit); ?>
-
-                <?php if($reminder->services->overdue_meter != null): ?>
-                <?php echo app('translator')->get('fleet.or'); ?> <?php echo e($reminder->services->overdue_meter); ?> <?php echo e(Hyvikk::get('dis_format')); ?>
-
-                <?php endif; ?>
-              </td>
-              <td>
-                <?php echo app('translator')->get('fleet.start_date'); ?>: <?php echo e(date($date_format_setting,strtotime($reminder->last_date))); ?>
-
-                
-              </td>
-              <td>
-                <?php ($interval = substr($reminder->services->overdue_unit,0,-3)); ?>
-                <?php if($reminder->services->overdue_time != null): ?>
-                  <?php ($int = $reminder->services->overdue_time.$interval); ?>
+                <?php if($reminder->preventive_maintenance->vehicle['vehicle_image'] != null): ?>
+                <img src="<?php echo e(asset('uploads/'.$reminder->preventive_maintenance->vehicle['vehicle_image'])); ?>" height="70px" width="70px">
                 <?php else: ?>
-                  <?php ($int = Hyvikk::get('time_interval')."day"); ?>
+                <img src="<?php echo e(asset(" assets/images/vehicle.jpeg")); ?>" height="70px" width="70px">
                 <?php endif; ?>
-                <?php if($reminder->last_date != 'N/D'): ?>
-                 <?php ($date = date('Y-m-d', strtotime($int, strtotime($reminder->last_date)))); ?> 
-                <?php else: ?>
-                 <?php ($date = date('Y-m-d', strtotime($int, strtotime(date('Y-m-d'))))); ?> 
-                <?php endif; ?>
-                <?php echo e(date($date_format_setting,strtotime($date))); ?>
-
-                <br>
-                <?php ($to = \Carbon\Carbon::now()); ?>
-
-                <?php ($from = \Carbon\Carbon::createFromFormat('Y-m-d', $date)); ?>
-
-                <?php ($diff_in_days = $to->diffInDays($from)); ?>
-                <?php echo app('translator')->get('fleet.after'); ?> <?php echo e($diff_in_days); ?> <?php echo app('translator')->get('fleet.days'); ?>
               </td>
+              <td>
+                <?php echo e($reminder->preventive_maintenance->vehicle->vehicleData->make); ?> <?php echo e($reminder->preventive_maintenance->vehicle->vehicleData->model); ?> - <?php echo e($reminder->preventive_maintenance->vehicle->license_plate); ?>
+
+              </td>
+              <td>
+                <?php echo e($reminder->preventive_maintenance->services['description']); ?>
+
+              </td>
+              <td>
+                <?php echo e(date($date_format_setting,strtotime($reminder->last_date))); ?>
+
+              </td>
+              <td>
+                <?php echo e($reminder->last_meter); ?> <?php echo e(Hyvikk::get('dis_format')); ?>
+
+              </td>
+              <td>
+                <?php echo e($reminder->planned_at); ?> <?php echo e(Hyvikk::get('dis_format')); ?>
+
+              </td>
+              <td>
+                <?php echo e(implode(', ', explode(',', $reminder->preventive_maintenance->email_to))); ?>
+
+              </td>
+
+
               
-              <td>
-                <?php echo Form::open(['url' => 'admin/service-reminder/'.$reminder->id,'method'=>'DELETE','class'=>'form-horizontal','id'=>'form_'.$reminder->id]); ?>
-
-
-                <?php echo Form::hidden("id",$reminder->id); ?>
-
-                  <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders delete')): ?><button type="button" class="btn btn-danger" data-id="<?php echo e($reminder->id); ?>" data-toggle="modal" data-target="#myModal" title="<?php echo app('translator')->get('fleet.delete'); ?>">
-                  <span class="fa fa-times" aria-hidden="true"></span>
-                  </button><?php endif; ?>
-                <?php echo Form::close(); ?>
-
-              </td>
+              
             </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           </tbody>
@@ -116,15 +94,18 @@
             <tr>
               <th>
                 <?php if($service_reminder->count() > 0): ?>
-                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders delete')): ?><button class="btn btn-danger" id="bulk_delete" data-toggle="modal" data-target="#bulkModal" disabled title="<?php echo app('translator')->get('fleet.delete'); ?>" ><i class="fa fa-trash"></i></button><?php endif; ?>
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ServiceReminders delete')): ?><button class="btn btn-danger" id="bulk_delete" data-toggle="modal"
+                  data-target="#bulkModal" disabled title="<?php echo app('translator')->get('fleet.delete'); ?>"><i
+                    class="fa fa-trash"></i></button><?php endif; ?>
                 <?php endif; ?>
               </th>
               <th></th>
               <th>Fleet</th>
               <th><?php echo app('translator')->get('fleet.service_item'); ?></th>
-              <th><?php echo app('translator')->get('fleet.start_date'); ?></th>
-              <th><?php echo app('translator')->get('fleet.next_due'); ?> (<?php echo app('translator')->get('fleet.date'); ?>)</th>
-              <th><?php echo app('translator')->get('fleet.action'); ?></th>
+              <th>Last Generated</th>
+              <th>Last Meter Reading</th>
+              <th>Planned at</th>
+              <th>Email to</th>
             </tr>
           </tfoot>
         </table>
@@ -152,7 +133,7 @@
         <button id="bulk_action" class="btn btn-danger" type="submit" data-submit=""><?php echo app('translator')->get('fleet.delete'); ?></button>
         <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo app('translator')->get('fleet.close'); ?></button>
       </div>
-        <?php echo Form::close(); ?>
+      <?php echo Form::close(); ?>
 
     </div>
   </div>
