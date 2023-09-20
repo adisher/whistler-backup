@@ -59,7 +59,7 @@
                     {!! Form::hidden('type', 'Created') !!}
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 {!! Form::label(
                                     'report_format',
                                     __('Report Format') . ' <span class="text-danger">*</span>',
@@ -69,9 +69,9 @@
                                 <select id="report_format" name="report_format" class="form-control" required>
                                     <option value="pdf">PDF</option>
                                     <option value="csv">CSV</option>
-                                    <option value="XSL">XSL</option>
+                                    <option value="xlsx">Excel</option>
                                 </select>
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 {!! Form::label(

@@ -23,17 +23,22 @@ class Kernel extends ConsoleKernel
 
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('notification:generate')->dailyAt('10:00');
-        $schedule->command('notification:generate')->dailyAt('16:00');
-        $schedule->command('notification:generate')->dailyAt('21:00');
-        $schedule->command('push:notification')->dailyAt('10:00');
-        $schedule->command('push:notification')->dailyAt('16:00');
-        $schedule->command('push:notification')->dailyAt('21:00');
-        $schedule->command('email:notification')->dailyAt('10:00');
-        $schedule->command('email:notification')->dailyAt('16:00');
-        $schedule->command('email:notification')->dailyAt('21:00');
-        $servicereminders= storage_path('cronlogs/preventive-maintenance.log');
-        $schedule->command('check:service-reminders')->timezone('Asia/Karachi')->daily()->withoutOverlapping()->appendOutputTo($servicereminders);
+        // $schedule->command('notification:generate')->dailyAt('10:00');
+        // $schedule->command('notification:generate')->dailyAt('16:00');
+        // $schedule->command('notification:generate')->dailyAt('21:00');
+        // $schedule->command('push:notification')->dailyAt('10:00');
+        // $schedule->command('push:notification')->dailyAt('16:00');
+        // $schedule->command('push:notification')->dailyAt('21:00');
+        // $schedule->command('email:notification')->dailyAt('10:00');
+        // $schedule->command('email:notification')->dailyAt('16:00');
+        // $schedule->command('email:notification')->dailyAt('21:00');
+        
+        $schedule->command('check:service-reminders')
+            ->timezone('Africa/Accra')
+            ->weeklyOn(1, '9:00')
+            ->withoutOverlapping();
+            
+
         // $schedule->command('backup:clean')->daily()->at('01:00');
         // $schedule->command('backup:run')->daily()->at('01:30');
     }

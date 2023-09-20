@@ -16,6 +16,8 @@ use App\Exports\ReportExport;
 use App\Http\Controllers\Controller;
 use App\Model\Bookings;
 use App\Model\CorrectiveMaintenance;
+use App\Model\PreventiveMaintenanceModel;
+use App\Model\PreventiveMaintenanceLogs;
 // use App\Model\PartsModel;
 use App\Model\DriverPayments;
 use App\Model\ExpCats;
@@ -195,7 +197,7 @@ class ReportsController extends Controller
         $check_corrective_maintenance = $request->corrective_maintenance;
         $check_preventive_maintenance = $request->preventive_maintenance;
 
-        // dd($check_corrective_maintenance);
+        // dd($check_preventive_maintenance);
 
         // Getting the date range and splitting it into start and end dates
         $date_range = explode(' - ', $request->get('date_range'));
@@ -238,7 +240,7 @@ class ReportsController extends Controller
 
         }
         if ($check_corrective_maintenance == "true") {
-            $corrective_maintenance = CorrectiveMaintenance::with(['vehicle'])
+            $corrective_maintenance = CorrectiveMaintenance::with(['vehicle', 'parts', 'parts.vendor'])
                 ->whereIn('vehicle_id', $fleet_ids)
                 ->whereBetween('date', [$start_date, $end_date]) // Apply date filter
                 ->get()
@@ -257,10 +259,13 @@ class ReportsController extends Controller
             });
 
         if ($check_preventive_maintenance == "true") {
-            $preventive_maintenance = ServiceReminderModel::with(['vehicle', 'services'])
+            $preventive_maintenance = PreventiveMaintenanceLogs::with(['vehicle', 'services', 'parts', 'parts.vendor'])
                 ->whereIn('vehicle_id', $fleet_ids)
                 ->whereBetween('created_at', [$start_date, $end_date]) // Apply date filter
-                ->get();
+                ->get()
+                ->groupBy(['vehicle_id', function ($item) {
+                    return $item->date; // Group by date
+                }]);;
         }
 
         $fleet_data = VehicleModel::with(['vehicleData', 'workOrders'])
@@ -291,6 +296,7 @@ class ReportsController extends Controller
             'corrective_maintenance' => $corrective_maintenance,
             'check_corrective_maintenance' => $check_corrective_maintenance,
             'preventive_maintenance' => $preventive_maintenance,
+            'check_preventive_maintenance' => $check_preventive_maintenance,
         ]);
     }
 

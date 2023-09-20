@@ -10,7 +10,6 @@ Design and developed by Hyvikk Solutions <https://hyvikk.com/>
  */
 namespace App\Mail;
 
-use Hyvikk;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -24,19 +23,13 @@ class ServiceReminderEmail extends Mailable
      *
      * @return void
      */
-    public $detail;
-    public $vehicle;
-    public $date;
-    public $diff_in_days;
-    public $user;
+    public $emailTitle;
+    public $reminder;
 
-    public function __construct($detail, $vehicle, $date, $diff_in_days, $user)
+    public function __construct($reminder, $emailTitle)
     {
-        $this->detail = $detail;
-        $this->vehicle = $vehicle;
-        $this->date = $date;
-        $this->diff_in_days = $diff_in_days;
-        $this->user = $user;
+        $this->reminder = $reminder;
+        $this->emailTitle = $emailTitle;
     }
 
     /**
@@ -46,6 +39,10 @@ class ServiceReminderEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Service Reminder')->view('emails.service_reminder');
+        return $this->subject("Service Reminder: {$this->emailTitle}")
+            ->markdown('emails.service_reminder')->with([
+                    'title' => $this->emailTitle,
+                ]);;
     }
+
 }

@@ -111,10 +111,10 @@
                                     false,
                                 ); ?>
 
-                                <select id="report_format" name="report_format" class="form-control">
-                                    <option value="pdf">PDF</option>
-                                    <option value="csv">CSV</option>
-                                    <option value="XSL">XSL</option>
+                                <select id="report_format" name="report_format" class="form-control" disabled>
+                                    
+                                    
+                                    <option value="xlsx">Excel</option>
                                 </select>
                             </div>
 
@@ -145,17 +145,7 @@
                                     <option value="monthly">Monthly</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <?php echo Form::label(
-                                    'delivery_end_date',
-                                    __('Delivery End Date') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ); ?>
-
-                                <?php echo Form::date('date', null, ['class' => 'form-control']); ?>
-
-                            </div>
+                            
 
 
                         </div>
@@ -193,12 +183,11 @@
 
                             </div>
                         </div>
-
                     </div>
                     <br />
-
                     <div class="row">
                         <div class="col-md-12">
+                            <button class="btn btn-success mt-3" id="schedule">Schedule Email</button>
                             
                         </div>
                     </div>
@@ -690,7 +679,7 @@
             }
 
             // Function to generate headers config
-            function generateHeadersConfig(fleetCheck, correctiveMaintenance, shiftDetailsCheck) {
+            function generateHeadersConfig(fleetCheck, correctiveMaintenance, preventiveMaintenance, shiftDetailsCheck) {
                 var config = [
                     fleetCheck ? {
                         title: 'Fleet ID',
@@ -705,7 +694,12 @@
                 if (correctiveMaintenance && fleetCheck) {
                     config.push({
                         title: 'Corrective Maintenance',
-                        colspan: 4
+                        colspan: 7
+                    });
+                } else if(!correctiveMaintenance && fleetCheck && preventiveMaintenance) {
+                    config.push({
+                        title: 'Preventive Maintenance',
+                        colspan: 9
                     });
                 } else {
                     config.push({
@@ -714,7 +708,7 @@
                     });
                 }
 
-                if (shiftDetailsCheck) {
+                if (shiftDetailsCheck && !correctiveMaintenance && !preventiveMaintenance) {
                     config.push({
                         title: 'Shift Details',
                         colspan: 6
@@ -776,12 +770,14 @@
 
                             var correctiveMaintenance = response.check_corrective_maintenance ==
                                 "true";
-                            console.log('correctiveMaintenance: ', correctiveMaintenance);
+                            var preventiveMaintenance = response.check_preventive_maintenance ==
+                                "true";
+                            console.log('preventiveMaintenance: ', preventiveMaintenance);
 
                             var shiftDetailsCheck = response.shift_checked == "true";
 
                             var headersConfig = generateHeadersConfig(fleetCheck,
-                                correctiveMaintenance, shiftDetailsCheck);
+                                correctiveMaintenance, preventiveMaintenance, shiftDetailsCheck);
 
                             function groupShiftDetails(shiftDetails) {
                                 var groupedDetails = {};
@@ -853,7 +849,22 @@
                                         '<th>Yield Quality (carats)</th>');
                                 } else if (header.title === 'Corrective Maintenance') {
                                     headerRow2.append('<th>Subject</th>');
+                                    headerRow2.append('<th>Meter</th>');
+                                    headerRow2.append('<th>Part/Item</th>');
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Quantity</th>');
+                                    headerRow2.append('<th>Cost</th>');
                                     headerRow2.append('<th>Description</th>');
+                                } else if (header.title === 'Preventive Maintenance') {
+                                headerRow2.append('<th>Service</th>');
+                                headerRow2.append('<th>Last Performed</th>');
+                                headerRow2.append('<th>Next Planned</th>');
+                                headerRow2.append('<th>Deviation</th>');
+                                headerRow2.append('<th>Part/Item</th>');
+                                headerRow2.append('<th>Vendor</th>');
+                                headerRow2.append('<th>Quantity</th>');
+                                headerRow2.append('<th>Cost</th>');
+                                headerRow2.append('<th>Email To</th>');
                                 }
                             });
 
@@ -868,7 +879,7 @@
                             var totalRentalCost = 0;
 
                             // Skip if data does not exist or is an empty object
-                            if (fleetCheck && !correctiveMaintenance) {
+                            if (fleetCheck && !correctiveMaintenance && !preventiveMaintenance) {
                                 headersConfig.push({
                                     title: 'Fleet ID',
                                     colspan: 1,
@@ -1106,8 +1117,8 @@
                                     .toFixed(2))); // Format total
                                 tbody.append(totalRow); // Append total row to the table (3)
                             }
-
-                            if (fleetCheck && correctiveMaintenance) {
+                            
+                            if (fleetCheck && correctiveMaintenance && !preventiveMaintenance) {
 
                                 // Dynamically access the corrective_maintenance data
                                 var corrective_maintenance_data = response
@@ -1130,7 +1141,54 @@
                                             appendCell(row, item.vehicle.fleet_no);
                                             appendCell(row, item.date);
                                             appendCell(row, item.subject);
+                                            appendCell(row, item.meter);
+                                            appendCell(row, item.parts.title);
+                                            appendCell(row, item.parts.vendor.name);
+                                            appendCell(row, item.quantity);
+                                            appendCell(row, item.price);
                                             appendCell(row, item.description);
+                                            // Add more cells as needed
+
+                                            // Append the row to the table body
+                                            tbody.append(row);
+                                        });
+                                    }
+                                }
+                            }
+                            if (fleetCheck && !correctiveMaintenance && preventiveMaintenance) {
+
+                                // Dynamically access the preventive_maintenance data
+                                var preventive_maintenance_data = response
+                                    .preventive_maintenance;
+
+                                // Iterate through the keys (e.g., '2', '2023-08-17') to access the arrays
+                                for (var key in preventive_maintenance_data) {
+                                    var date_key_data = preventive_maintenance_data[key];
+
+                                    // Iterate through the keys again for the given date (e.g., '2023-08-17')
+                                    for (var date_key in date_key_data) {
+                                        var date_data = date_key_data[date_key];
+
+                                        // Now date_data is an array; you can iterate through it
+                                        date_data.forEach(function(item) {
+                                            // Create a new row
+                                            var row = $('<tr></tr>');
+                                            // Replace all commas with line breaks
+                                            var email = item.email_to ? item.email_to.replace(/,/g, '\n ') : 'N/A';
+                                            var emailToFormatted = email.replace(/,/g, '\n');
+                                            
+                                            // Append cells to the row using the appendCell function
+                                            appendCell(row, item.vehicle.fleet_no);
+                                            appendCell(row, item.date);
+                                            appendCell(row, item.services.description);
+                                            appendCell(row, item.last_performed);
+                                            appendCell(row, item.next_planned);
+                                            appendCell(row, item.deviation ?? 'N/A');
+                                            appendCell(row, item.parts.title);
+                                            appendCell(row, item.parts.vendor.name);
+                                            appendCell(row, item.quantity);
+                                            appendCell(row, item.price);
+                                            appendCell(row, emailToFormatted);
                                             // Add more cells as needed
 
                                             // Append the row to the table body

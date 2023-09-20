@@ -79,7 +79,7 @@ class PreventiveMaintenanceController extends Controller
 
         // After updating the PreventiveMaintenanceModel
         $serviceReminder = ServiceReminderModel::where('maintenance_id', $row_id)->first();
-        $serviceReminder->last_date = now(); 
+        $serviceReminder->last_date = now();
         $serviceReminder->last_meter = $end_meter;
         $serviceReminder->save();
 
@@ -116,6 +116,7 @@ class PreventiveMaintenanceController extends Controller
 
         $vehicle_id = $request->vehicle_id;
         $quantity = $request->quantity;
+        $part_id = $request->parts_id;
 
         // Fetch the current meter reading from the VehicleModel
         $current_meter_reading = VehicleModel::find($vehicle_id)->int_mileage;
@@ -131,7 +132,7 @@ class PreventiveMaintenanceController extends Controller
             // Create new preventive maintenance record
             $preventive = new PreventiveMaintenanceModel();
             $preventive->service_item_id = $service_item_id;
-            $preventive->parts_id = $request->parts_id;
+            $preventive->parts_id = $part_id;
             $preventive->vehicle_id = $vehicle_id;
             $preventive->last_performed = $current_meter_reading;
             $preventive->next_planned = $planned_meter_reading;
@@ -161,6 +162,13 @@ class PreventiveMaintenanceController extends Controller
             $serviceReminder->last_meter = $current_meter_reading;
             $serviceReminder->save();
 
+            $update_part = PartsModel::find($part_id);
+            $update_part->stock = $update_part->stock - $quantity;
+            $update_part->save();
+            if ($update_part->stock == 0) {
+                $update_part->availability = 0;
+                $update_part->save();
+            }
 
         }
 

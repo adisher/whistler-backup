@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\ServiceReminderEmail;
 use App\Model\ServiceReminderModel;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ServiceReminderEmail;
+use Illuminate\Support\Facades\Log;
 
 class CheckServiceReminders extends Command
 {
@@ -40,53 +41,64 @@ class CheckServiceReminders extends Command
      */
     public function handle()
     {
+        $this->info("Starting service reminders check...");
+
         // Fetch all reminders
         $reminders = ServiceReminderModel::with('preventive_maintenance')->get();
+        $logMessages = [];
 
         foreach ($reminders as $reminder) {
             $next_planned = $reminder->preventive_maintenance->next_planned;
-            $last_meter = $reminder->last_meter;
-
-            var_dump('$next_planned: ', $next_planned);
-            var_dump('$last_meter: ', $last_meter);
+            $last_meter = intval($reminder->last_meter); // Convert to integer to ensure type consistency
 
             $upper_threshold = $next_planned + 50;
             $lower_threshold = $next_planned - 50;
 
-            var_dump('$upper_threshold: ', $upper_threshold);
-            var_dump('$lower_threshold: ', $lower_threshold);
-            var_dump('$last_meter - $lower_threshold: ', $last_meter - $lower_threshold);
-            var_dump('$last_meter - $upper_threshold: ', $last_meter - $upper_threshold);
+            // var_dump('$next_planned: ', $next_planned);
+            // var_dump('$upper_threshold: ', $upper_threshold);
+            // var_dump('$lower_threshold: ', $lower_threshold);
+            // var_dump('$last_meter <= $lower_threshold: ', $last_meter <= $lower_threshold);
+            // var_dump('$last_meter >= $upper_threshold: ', $last_meter >= $upper_threshold);
+            // var_dump('$last_meter > $upper_threshold: ', $last_meter > $upper_threshold);
 
-            // Check if within 10 km of lower threshold
-            if (abs($last_meter - $lower_threshold) <= 10) {
-                dd('here 1');
+            // Check if last_meter is within or equal to the lower threshold
+            if ($last_meter <= $lower_threshold) {
                 $emailTitle = "Upcoming Maintenance";
-                $this->sendEmail($next_planned, $emailTitle);
+                $this->sendEmail($reminder, $emailTitle);
+                $logMessages[] = "Sent Upcoming Maintenance reminder for next_planned: $next_planned.";
             }
 
-            // Check if within 10 km of upper threshold
-            if (abs($last_meter - $upper_threshold) <= 10) {
-                dd('here 2');
-                $emailTitle = "Upcoming Maintenance";
-                $this->sendEmail($next_planned, $emailTitle);
+            // Check if last_meter is within or equal to the upper threshold
+            if ($last_meter >= $upper_threshold) {
+                $emailTitle = "Overdue Maintenance";
+                $this->sendEmail($reminder, $emailTitle);
+                $logMessages[] = "Sent Overdue Maintenance reminder for next_planned: $next_planned.";
             }
 
-            // Check if exceeded the upper threshold
             if ($last_meter > $upper_threshold) {
-                dd('here 3');
                 $emailTitle = "Missed Maintenance";
-                $this->sendEmail($next_planned, $emailTitle);
+                $this->sendEmail($reminder, $emailTitle);
+                $logMessages[] = "Sent Missed Maintenance reminder for next_planned: $next_planned.";
             }
         }
 
-        return true;
+        // var_dump(is_writable(storage_path('cronlogs/preventive-maintenance.log')));
+
+
+        // Print log messages
+        foreach ($logMessages as $message) {
+            $this->info($message); // This will be captured by appendOutputTo()
+            Log::channel('preventive_maintenance')->info($message); // This will be captured by sendOutputTo()
+        }
+        $this->info("Service reminders check completed.");
+
 
     }
 
     public function sendEmail($reminder, $emailTitle)
     {
-        $recipients = explode(',', $reminder->preventive_maintenance->recipients);
-        Mail::to($recipients)->send(new ServiceReminderEmail($next_planned, $emailTitle));
+        $recipients = explode(',', $reminder->preventive_maintenance->email_to);
+        var_dump($recipients);
+        Mail::to($recipients)->send(new ServiceReminderEmail($reminder, $emailTitle));
     }
 }

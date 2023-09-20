@@ -114,6 +114,13 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
         ],
 
+        'preventive_maintenance' => [
+            'driver' => 'single',
+            'level'  => 'info',
+            'path'   => storage_path('cronlogs/preventive-maintenance.log'),
+            'bubble' => false
+        ],
+
         'null' => [
             'driver' => 'monolog',
             'handler' => NullHandler::class,
