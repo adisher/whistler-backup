@@ -16,20 +16,18 @@ use App\Exports\ReportExport;
 use App\Http\Controllers\Controller;
 use App\Model\Bookings;
 use App\Model\CorrectiveMaintenance;
-use App\Model\PreventiveMaintenanceModel;
-use App\Model\PreventiveMaintenanceLogs;
-// use App\Model\PartsModel;
 use App\Model\DriverPayments;
 use App\Model\ExpCats;
+// use App\Model\PartsModel;
 use App\Model\Expense;
 use App\Model\FuelAllocationModel;
 use App\Model\FuelModel;
 use App\Model\IncCats;
 use App\Model\IncomeModel;
 use App\Model\PartsModel;
+use App\Model\PreventiveMaintenanceLogs;
 use App\Model\Scheduled;
 use App\Model\ServiceItemsModel;
-use App\Model\ServiceReminderModel;
 use App\Model\ShiftDetails;
 use App\Model\Site;
 use App\Model\User;
@@ -194,6 +192,7 @@ class ReportsController extends Controller
         $rental_checked = $request->rental_checked;
         $shift_details = $request->shift_checked;
         $deployment_checked = $request->deployment_checked;
+        $fuel_allocation_checked = $request->fuel_allocation_checked;
         $check_corrective_maintenance = $request->corrective_maintenance;
         $check_preventive_maintenance = $request->preventive_maintenance;
 
@@ -208,6 +207,7 @@ class ReportsController extends Controller
         $deployment_data = '';
         $corrective_maintenance = '';
         $preventive_maintenance = '';
+        $fuel_allocation = '';
 
         // Start building the main query
         $query = WorkOrders::with(['vehicle', 'sites', 'assigned_driver'])
@@ -249,6 +249,16 @@ class ReportsController extends Controller
                 }]);
         }
 
+        if($fuel_allocation_checked == "true"){
+            $fuel_allocation = FuelAllocationModel::with(['vehicle_data'])
+                ->whereIn('vehicle_id', $fleet_ids)
+                ->whereBetween('date', [$start_date, $end_date]) // Apply date filter
+                ->get()
+                ->groupBy(['vehicle_id', function ($item) {
+                    return $item->date; // Group by date
+                }]);
+        }
+
         // Execute the query
         $fleet_rental = $query->get()
             ->groupBy(['vehicle_id', function ($item) {
@@ -265,7 +275,7 @@ class ReportsController extends Controller
                 ->get()
                 ->groupBy(['vehicle_id', function ($item) {
                     return $item->date; // Group by date
-                }]);;
+                }]);
         }
 
         $fleet_data = VehicleModel::with(['vehicleData', 'workOrders'])
@@ -276,13 +286,21 @@ class ReportsController extends Controller
 
         $parts_data = PartsModel::with(['vendor'])
             ->whereIn('vendor_id', $parts_ids)
-            ->whereBetween('created_at', [$start_date, $end_date]) // Apply date filter
-            ->get();
+            ->whereBetween('date', [$start_date, $end_date]) // Apply date filter
+            ->orderBy('date', 'desc')
+            ->get()
+            ->groupBy(['vendor_id', function ($item) {
+                return $item->date; // Group by date
+            }]);
 
         $fuel_data = FuelModel::with(['vendor'])
             ->whereIn('vendor_name', $fuel_ids)
-            ->whereBetween('created_at', [$start_date, $end_date]) // Apply date filter
-            ->get();
+            ->whereBetween('date', [$start_date, $end_date]) // Apply date filter
+            ->orderBy('date', 'desc')
+            ->get()
+            ->groupBy(['vendor_name', function ($item) {
+                return $item->date; // Group by date
+            }]);
 
         return response()->json([
             'fleet_ids' => $fleet_ids,
@@ -297,6 +315,8 @@ class ReportsController extends Controller
             'check_corrective_maintenance' => $check_corrective_maintenance,
             'preventive_maintenance' => $preventive_maintenance,
             'check_preventive_maintenance' => $check_preventive_maintenance,
+            'fuel_allocation_checked' => $fuel_allocation_checked,
+            'fuel_allocation' => $fuel_allocation,
         ]);
     }
 
@@ -851,7 +871,8 @@ class ReportsController extends Controller
         return view('reports.fuel', $data);
     }
 
-    function yield () {
+    public function yield ()
+    {
         $years = collect(DB::select("select distinct year(date) as years from product_yields where deleted_at is null order by years desc"))->toArray();
 
         $y = array();

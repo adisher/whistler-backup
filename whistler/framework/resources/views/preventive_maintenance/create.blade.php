@@ -81,7 +81,7 @@
                 @foreach ($parts as $part)
                 <option value="{{ $part->id }}">{{ $part->title }} - {{ $part->vendor->name }}
                   -
-                  {{ $part->stock }}</option>
+                  {{ $part->remaining_qty }}</option>
                 @endforeach
               </select>
             </div>

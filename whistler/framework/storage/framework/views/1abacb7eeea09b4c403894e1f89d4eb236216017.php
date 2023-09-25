@@ -89,7 +89,7 @@
                 <option value="<?php echo e($part->id); ?>"><?php echo e($part->title); ?> - <?php echo e($part->vendor->name); ?>
 
                   -
-                  <?php echo e($part->stock); ?></option>
+                  <?php echo e($part->remaining_qty); ?></option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
               </select>
             </div>

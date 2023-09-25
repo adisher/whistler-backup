@@ -141,6 +141,8 @@ class PartsController extends Controller
             'manufacturer' => $request->get('manufacturer'),
             'note' => $request->get('note'),
             'stock' => $request->get('stock'),
+            'remaining_qty' => $request->get('stock'),
+            'date' => $request->get('date'),
             'udf' => serialize($request->get('udf')),
             'category_id' => $request->category_id,
             'title' => $request->get('title'),

@@ -163,7 +163,7 @@ class PreventiveMaintenanceController extends Controller
             $serviceReminder->save();
 
             $update_part = PartsModel::find($part_id);
-            $update_part->stock = $update_part->stock - $quantity;
+            $update_part->remaining_qty = $update_part->remaining_qty - $quantity;
             $update_part->save();
             if ($update_part->stock == 0) {
                 $update_part->availability = 0;

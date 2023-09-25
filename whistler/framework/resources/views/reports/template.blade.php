@@ -141,14 +141,14 @@
                                 </select>
                             </div>
                             {{-- <div class="form-group">
-                                {!! Form::label(
-                                    'delivery_end_date',
-                                    __('Delivery End Date') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ) !!}
-                                {!! Form::date('date', null, ['class' => 'form-control']) !!}
-                            </div> --}}
+                            {!! Form::label(
+                            'delivery_end_date',
+                            __('Delivery End Date') . ' <span class="text-danger">*</span>',
+                            ['class' => 'form-label'],
+                            false,
+                            ) !!}
+                            {!! Form::date('date', null, ['class' => 'form-control']) !!}
+                        </div> --}}
 
 
                         </div>
@@ -200,7 +200,8 @@
         <div class="modal-dialog modal-xxl" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    {{-- <img src="{{ asset('assets/images/sample-fleet-rental.png') }}" class="img-fluid" alt="Sample Image"> --}}
+                    {{-- <img src="{{ asset('assets/images/sample-fleet-rental.png') }}" class="img-fluid"
+                    alt="Sample Image"> --}}
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-success" id="download">Download</button>
@@ -677,7 +678,8 @@
             }
 
             // Function to generate headers config
-            function generateHeadersConfig(fleetCheck, correctiveMaintenance, preventiveMaintenance, shiftDetailsCheck) {
+            function generateHeadersConfig(fleetCheck, correctiveMaintenance, preventiveMaintenance,
+                shiftDetailsCheck, fuel, parts, fuel_allocation) {
                 var config = [
                     fleetCheck ? {
                         title: 'Fleet ID',
@@ -689,26 +691,50 @@
                     }
                 ];
 
-                if (correctiveMaintenance && fleetCheck) {
+                if (!fuel && correctiveMaintenance && fleetCheck) {
                     config.push({
                         title: 'Corrective Maintenance',
                         colspan: 7
                     });
-                } else if(!correctiveMaintenance && fleetCheck && preventiveMaintenance) {
+                } else if (!fuel && !correctiveMaintenance && fleetCheck && preventiveMaintenance) {
                     config.push({
                         title: 'Preventive Maintenance',
                         colspan: 9
                     });
-                } else {
+                }
+
+                if (!fuel && !correctiveMaintenance && !preventiveMaintenance && !fuel_allocation && fleetCheck || shiftDetailsCheck) {
                     config.push({
                         title: 'Deployment',
                         colspan: 4
                     });
                 }
 
-                if (shiftDetailsCheck && !correctiveMaintenance && !preventiveMaintenance) {
+                if (!fuel && shiftDetailsCheck && !correctiveMaintenance && !preventiveMaintenance) {
                     config.push({
                         title: 'Shift Details',
+                        colspan: 6
+                    });
+                }
+                if (fuel_allocation && !fuel && shiftDetailsCheck && !correctiveMaintenance && !
+                    preventiveMaintenance) {
+                    config.push({
+                        title: 'Fuel Allocation',
+                        colspan: 6
+                    });
+                }
+
+                if (fuel && !correctiveMaintenance && !preventiveMaintenance && !shiftDetailsCheck && !fleetCheck) {
+                    config.push({
+                        title: 'Fuel',
+                        colspan: 5
+                    });
+                }
+
+                if (parts && !fuel && !correctiveMaintenance && !preventiveMaintenance && !shiftDetailsCheck && !
+                    fleetCheck) {
+                    config.push({
+                        title: 'Parts',
                         colspan: 6
                     });
                 }
@@ -754,6 +780,7 @@
                             date_range: $('#daterange').val(),
                             rental_checked: $('#rental').is(':checked'),
                             shift_checked: $('#shiftDetails').is(':checked'),
+                            fuel_allocation_checked: $('#fuel_allocation').is(':checked'),
                             deployment_checked: $('#deploymentToggle').is(':checked'),
                             sites: JSON.stringify(selectedSites),
                             shifts: JSON.stringify(selectedShifts),
@@ -774,8 +801,43 @@
 
                             var shiftDetailsCheck = response.shift_checked == "true";
 
+                            var fuel_allocation = response.fuel_allocation_checked == "true";
+                            if (fuel_allocation) {
+                                console.log('fuel_allocation: ', fuel_allocation);
+                            } else {
+                                console.log('fuel_allocation empty: ', fuel_allocation);
+                            }
+
+                            var fuel = response['fuel'] != '';
+                            if (fuel) {
+                                console.log('fuel: ', fuel);
+                            } else {
+                                console.log('fuel not empty: ', fuel);
+                            }
+
+                            var parts = response['parts'] != '';
+                            if (parts) {
+                                console.log('parts: ', parts);
+                            } else {
+                                console.log('parts not empty: ', parts);
+                            }
+
                             var headersConfig = generateHeadersConfig(fleetCheck,
-                                correctiveMaintenance, preventiveMaintenance, shiftDetailsCheck);
+                                correctiveMaintenance, preventiveMaintenance,
+                                shiftDetailsCheck, fuel, parts, fuel_allocation);
+
+                            function appendRowWithDate(date, data, tbody) {
+                                var row = $('<tr></tr>');
+                                appendCell(row, date); // Append Date first
+
+                                // Append other cells based on data
+                                data.forEach(function(item) {
+                                    appendCell(row, item);
+                                });
+
+                                // Append the row to the table body
+                                tbody.append(row);
+                            }
 
                             function groupShiftDetails(shiftDetails) {
                                 var groupedDetails = {};
@@ -854,15 +916,31 @@
                                     headerRow2.append('<th>Cost</th>');
                                     headerRow2.append('<th>Description</th>');
                                 } else if (header.title === 'Preventive Maintenance') {
-                                headerRow2.append('<th>Service</th>');
-                                headerRow2.append('<th>Last Performed</th>');
-                                headerRow2.append('<th>Next Planned</th>');
-                                headerRow2.append('<th>Deviation</th>');
-                                headerRow2.append('<th>Part/Item</th>');
-                                headerRow2.append('<th>Vendor</th>');
-                                headerRow2.append('<th>Quantity</th>');
-                                headerRow2.append('<th>Cost</th>');
-                                headerRow2.append('<th>Email To</th>');
+                                    headerRow2.append('<th>Service</th>');
+                                    headerRow2.append('<th>Last Performed</th>');
+                                    headerRow2.append('<th>Next Planned</th>');
+                                    headerRow2.append('<th>Deviation</th>');
+                                    headerRow2.append('<th>Part/Item</th>');
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Quantity</th>');
+                                    headerRow2.append('<th>Cost</th>');
+                                    headerRow2.append('<th>Email To</th>');
+                                } else if (header.title === 'Fuel') {
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Purchased Qty</th>');
+                                    headerRow2.append('<th>Unit Cost</th>');
+                                    headerRow2.append('<th>Total Cost</th>');
+                                    headerRow2.append('<th>Remaining Qty</th>');
+                                } else if (header.title === 'Parts') {
+                                    headerRow2.append('<th>Item</th>');
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Purchased Qty</th>');
+                                    headerRow2.append('<th>Unit Cost</th>');
+                                    headerRow2.append('<th>Total Cost</th>');
+                                    headerRow2.append('<th>Remaining Qty</th>');
+                                } else if (header.title === 'Fuel Allocation') {
+                                    headerRow2.append('<th>Quantity</th>');
+                                    headerRow2.append('<th>Meter</th>');
                                 }
                             });
 
@@ -877,7 +955,8 @@
                             var totalRentalCost = 0;
 
                             // Skip if data does not exist or is an empty object
-                            if (fleetCheck && !correctiveMaintenance && !preventiveMaintenance) {
+                            if (fleetCheck && !correctiveMaintenance && !
+                                preventiveMaintenance) {
                                 headersConfig.push({
                                     title: 'Fleet ID',
                                     colspan: 1,
@@ -1115,7 +1194,33 @@
                                     .toFixed(2))); // Format total
                                 tbody.append(totalRow); // Append total row to the table (3)
                             }
-                            
+
+                            if (fuel_allocation && fleetCheck) {
+                                // Iterate through vehicle IDs
+                                for (var vehicle_id in response.fuel_allocation) {
+                                    var date_data = response.fuel_allocation[vehicle_id];
+
+                                    // Iterate through the dates for each vehicle ID
+                                    for (var date_key in date_data) {
+                                        var allocations = date_data[date_key];
+
+                                        // Now, allocations is an array; you can iterate through it
+                                        allocations.forEach(function(allocation) {
+                                            // Create a new row
+                                            var row = $('<tr></tr>');
+
+                                            // Append cells to the row
+                                            appendCell(row, allocation.date);
+                                            appendCell(row, allocation.meter);
+                                            appendCell(row, allocation.qty);
+
+                                            // Append the row to the table body
+                                            tbody.append(row);
+                                        });
+                                    }
+                                }
+                            }
+
                             if (fleetCheck && correctiveMaintenance && !preventiveMaintenance) {
 
                                 // Dynamically access the corrective_maintenance data
@@ -1172,9 +1277,11 @@
                                             // Create a new row
                                             var row = $('<tr></tr>');
                                             // Replace all commas with line breaks
-                                            var email = item.email_to ? item.email_to.replace(/,/g, '\n ') : 'N/A';
-                                            var emailToFormatted = email.replace(/,/g, '\n');
-                                            
+                                            var email = item.email_to ? item.email_to
+                                                .replace(/,/g, '\n ') : 'N/A';
+                                            var emailToFormatted = email.replace(/,/g,
+                                                '\n');
+
                                             // Append cells to the row using the appendCell function
                                             appendCell(row, item.vehicle.fleet_no);
                                             appendCell(row, item.date);
@@ -1191,6 +1298,68 @@
 
                                             // Append the row to the table body
                                             tbody.append(row);
+                                        });
+                                    }
+                                }
+                            }
+                            if (fuel && !correctiveMaintenance && !preventiveMaintenance && !
+                                shiftDetailsCheck && !fleetCheck) {
+
+                                // Dynamically access the preventive_maintenance data
+                                var fuel_data = response
+                                    .fuel;
+
+                                // Iterate through the keys (e.g., '2', '2023-08-17') to access the arrays
+                                for (var key in fuel_data) {
+                                    var date_key_data = fuel_data[key];
+
+                                    // Iterate through the keys again for the given date (e.g., '2023-08-17')
+                                    for (var date_key in date_key_data) {
+                                        var date_data = date_key_data[date_key];
+
+                                        // Now date_data is an array; you can iterate through it
+                                        date_data.forEach(function(item) {
+                                            var total_cost = item.qty * item
+                                                .cost_per_unit;
+                                            appendRowWithDate(
+                                                item.date,
+                                                [item.vendor.name, item.qty, item
+                                                    .cost_per_unit, total_cost, item
+                                                    .remaining_qty
+                                                ],
+                                                tbody
+                                            );
+                                        });
+                                    }
+                                }
+                            }
+                            if (parts && !fuel && !correctiveMaintenance && !
+                                preventiveMaintenance && !shiftDetailsCheck && !fleetCheck) {
+
+                                // Dynamically access the preventive_maintenance data
+                                var parts_data = response
+                                    .parts;
+
+                                // Iterate through the keys (e.g., '2', '2023-08-17') to access the arrays
+                                for (var key in parts_data) {
+                                    var date_key_data = parts_data[key];
+
+                                    // Iterate through the keys again for the given date (e.g., '2023-08-17')
+                                    for (var date_key in date_key_data) {
+                                        var date_data = date_key_data[date_key];
+
+                                        // Now date_data is an array; you can iterate through it
+                                        date_data.forEach(function(item) {
+                                            var total_cost = item.stock * item
+                                            .unit_cost;
+                                            appendRowWithDate(
+                                                item.date,
+                                                [item.title, item.vendor.name, item
+                                                    .stock, item.unit_cost,
+                                                    total_cost, item.remaining_qty
+                                                ],
+                                                tbody
+                                            );
                                         });
                                     }
                                 }
@@ -1281,108 +1450,106 @@
 {{-- @extends('layouts.app')
 @php($date_format_setting = Hyvikk::get('date_format') ? Hyvikk::get('date_format') : 'd-m-Y')
 @section('extra_css')
-    <style>
-        .border-btn {
-            background-color: transparent;
-            border: 1px solid #ddd;
-        }
+<style>
+    .border-btn {
+        background-color: transparent;
+        border: 1px solid #ddd;
+    }
 
-        .custom-item i {
-            margin-right: 10px;
-        }
+    .custom-item i {
+        margin-right: 10px;
+    }
 
-        .custom-item:hover {
-            background-color: #ddd;
-        }
+    .custom-item:hover {
+        background-color: #ddd;
+    }
 
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: bolder;
-            margin-bottom: 1rem;
-            text-align: center;
-            float: none;
-        }
+    .card-title {
+        font-size: 1.4rem;
+        font-weight: bolder;
+        margin-bottom: 1rem;
+        text-align: center;
+        float: none;
+    }
 
-        .text-icon {
-            color: #3f51b5 !important
-        }
+    .text-icon {
+        color: #3f51b5 !important
+    }
 
-        .image-container {
-            position: relative;
-            display: inline-block;
-        }
+    .image-container {
+        position: relative;
+        display: inline-block;
+    }
 
-        .image-container .img-fluid {
-            width: 100%;
-            height: auto;
-        }
+    .image-container .img-fluid {
+        width: 100%;
+        height: auto;
+    }
 
-        .overlay-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgb(255, 254, 254);
-            font-size: 2em;
-            text-shadow: 2px 2px 4px rgb(255, 255, 255);
-            background-color: #3f51b5;
-            border-radius: 5px;
-            padding: 5px;
-        }
-    </style>
+    .overlay-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgb(255, 254, 254);
+        font-size: 2em;
+        text-shadow: 2px 2px 4px rgb(255, 255, 255);
+        background-color: #3f51b5;
+        border-radius: 5px;
+        padding: 5px;
+    }
+</style>
 @endsection
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="#">@lang('menu.reports')</a></li>
-    <li class="breadcrumb-item active">Reports Template</li>
+<li class="breadcrumb-item"><a href="#">@lang('menu.reports')</a></li>
+<li class="breadcrumb-item active">Reports Template</li>
 @endsection
 @section('content')
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h2 class="card-title">Cost Analysis - Fleet Rental</h2>
-                    <p class="card-text">The Fleet Rental Report offers a comprehensive analysis of the rental expenses for
-                        each selected asset by calculating
-                        the cost based on shift work hours and the rental amount.</p>
-                    <div class="mt-5 mb-3">
-                        <a href="#" class="card-link" data-toggle="modal" data-target="#modal1">View Sample</a>
-                    </div>
-                    <div class="dropdown mt-1">
-                        <button class="btn border-btn dropdown-toggle" type="button" id="dropdownMenuButton1"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Email Report
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            <a class="dropdown-item custom-item" href="{{ route('reports.generate') }}"><i
-                                    class="fa fa-file-excel text-icon"></i>CSV</a>
-                            <a class="dropdown-item custom-item" href="#"><i
-                                    class="fa fa-file-pdf text-icon"></i>PDF</a>
-                            <a class="dropdown-item custom-item" href="#"><i class="fa fa-file text-icon"></i>XLS</a>
-                        </div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="card-title">Cost Analysis - Fleet Rental</h2>
+                <p class="card-text">The Fleet Rental Report offers a comprehensive analysis of the rental expenses for
+                    each selected asset by calculating
+                    the cost based on shift work hours and the rental amount.</p>
+                <div class="mt-5 mb-3">
+                    <a href="#" class="card-link" data-toggle="modal" data-target="#modal1">View Sample</a>
+                </div>
+                <div class="dropdown mt-1">
+                    <button class="btn border-btn dropdown-toggle" type="button" id="dropdownMenuButton1"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Email Report
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <a class="dropdown-item custom-item" href="{{ route('reports.generate') }}"><i
+                                class="fa fa-file-excel text-icon"></i>CSV</a>
+                        <a class="dropdown-item custom-item" href="#"><i class="fa fa-file-pdf text-icon"></i>PDF</a>
+                        <a class="dropdown-item custom-item" href="#"><i class="fa fa-file text-icon"></i>XLS</a>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Repeat the above column for the second and third columns -->
     </div>
+    <!-- Repeat the above column for the second and third columns -->
+</div>
 
-    <!-- Modals -->
-    <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="image-container">
-                        <img src="{{ asset('assets/images/sample-fleet-rental.PNG') }}" class="img-fluid"
-                            alt="Sample Image">
-                        <div class="overlay-text">SAMPLE</div>
-                    </div>
+<!-- Modals -->
+<div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="image-container">
+                    <img src="{{ asset('assets/images/sample-fleet-rental.PNG') }}" class="img-fluid"
+                        alt="Sample Image">
+                    <div class="overlay-text">SAMPLE</div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
-    <!-- Repeat for other modals -->
+</div>
+<!-- Repeat for other modals -->
 @endsection --}}

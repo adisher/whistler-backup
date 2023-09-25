@@ -679,7 +679,8 @@
             }
 
             // Function to generate headers config
-            function generateHeadersConfig(fleetCheck, correctiveMaintenance, preventiveMaintenance, shiftDetailsCheck) {
+            function generateHeadersConfig(fleetCheck, correctiveMaintenance, preventiveMaintenance,
+                shiftDetailsCheck, fuel, parts, fuel_allocation) {
                 var config = [
                     fleetCheck ? {
                         title: 'Fleet ID',
@@ -691,26 +692,50 @@
                     }
                 ];
 
-                if (correctiveMaintenance && fleetCheck) {
+                if (!fuel && correctiveMaintenance && fleetCheck) {
                     config.push({
                         title: 'Corrective Maintenance',
                         colspan: 7
                     });
-                } else if(!correctiveMaintenance && fleetCheck && preventiveMaintenance) {
+                } else if (!fuel && !correctiveMaintenance && fleetCheck && preventiveMaintenance) {
                     config.push({
                         title: 'Preventive Maintenance',
                         colspan: 9
                     });
-                } else {
+                }
+
+                if (!fuel && !correctiveMaintenance && !preventiveMaintenance && !fuel_allocation && fleetCheck || shiftDetailsCheck) {
                     config.push({
                         title: 'Deployment',
                         colspan: 4
                     });
                 }
 
-                if (shiftDetailsCheck && !correctiveMaintenance && !preventiveMaintenance) {
+                if (!fuel && shiftDetailsCheck && !correctiveMaintenance && !preventiveMaintenance) {
                     config.push({
                         title: 'Shift Details',
+                        colspan: 6
+                    });
+                }
+                if (fuel_allocation && !fuel && shiftDetailsCheck && !correctiveMaintenance && !
+                    preventiveMaintenance) {
+                    config.push({
+                        title: 'Fuel Allocation',
+                        colspan: 6
+                    });
+                }
+
+                if (fuel && !correctiveMaintenance && !preventiveMaintenance && !shiftDetailsCheck && !fleetCheck) {
+                    config.push({
+                        title: 'Fuel',
+                        colspan: 5
+                    });
+                }
+
+                if (parts && !fuel && !correctiveMaintenance && !preventiveMaintenance && !shiftDetailsCheck && !
+                    fleetCheck) {
+                    config.push({
+                        title: 'Parts',
                         colspan: 6
                     });
                 }
@@ -756,6 +781,7 @@
                             date_range: $('#daterange').val(),
                             rental_checked: $('#rental').is(':checked'),
                             shift_checked: $('#shiftDetails').is(':checked'),
+                            fuel_allocation_checked: $('#fuel_allocation').is(':checked'),
                             deployment_checked: $('#deploymentToggle').is(':checked'),
                             sites: JSON.stringify(selectedSites),
                             shifts: JSON.stringify(selectedShifts),
@@ -776,8 +802,43 @@
 
                             var shiftDetailsCheck = response.shift_checked == "true";
 
+                            var fuel_allocation = response.fuel_allocation_checked == "true";
+                            if (fuel_allocation) {
+                                console.log('fuel_allocation: ', fuel_allocation);
+                            } else {
+                                console.log('fuel_allocation empty: ', fuel_allocation);
+                            }
+
+                            var fuel = response['fuel'] != '';
+                            if (fuel) {
+                                console.log('fuel: ', fuel);
+                            } else {
+                                console.log('fuel not empty: ', fuel);
+                            }
+
+                            var parts = response['parts'] != '';
+                            if (parts) {
+                                console.log('parts: ', parts);
+                            } else {
+                                console.log('parts not empty: ', parts);
+                            }
+
                             var headersConfig = generateHeadersConfig(fleetCheck,
-                                correctiveMaintenance, preventiveMaintenance, shiftDetailsCheck);
+                                correctiveMaintenance, preventiveMaintenance,
+                                shiftDetailsCheck, fuel, parts, fuel_allocation);
+
+                            function appendRowWithDate(date, data, tbody) {
+                                var row = $('<tr></tr>');
+                                appendCell(row, date); // Append Date first
+
+                                // Append other cells based on data
+                                data.forEach(function(item) {
+                                    appendCell(row, item);
+                                });
+
+                                // Append the row to the table body
+                                tbody.append(row);
+                            }
 
                             function groupShiftDetails(shiftDetails) {
                                 var groupedDetails = {};
@@ -856,15 +917,31 @@
                                     headerRow2.append('<th>Cost</th>');
                                     headerRow2.append('<th>Description</th>');
                                 } else if (header.title === 'Preventive Maintenance') {
-                                headerRow2.append('<th>Service</th>');
-                                headerRow2.append('<th>Last Performed</th>');
-                                headerRow2.append('<th>Next Planned</th>');
-                                headerRow2.append('<th>Deviation</th>');
-                                headerRow2.append('<th>Part/Item</th>');
-                                headerRow2.append('<th>Vendor</th>');
-                                headerRow2.append('<th>Quantity</th>');
-                                headerRow2.append('<th>Cost</th>');
-                                headerRow2.append('<th>Email To</th>');
+                                    headerRow2.append('<th>Service</th>');
+                                    headerRow2.append('<th>Last Performed</th>');
+                                    headerRow2.append('<th>Next Planned</th>');
+                                    headerRow2.append('<th>Deviation</th>');
+                                    headerRow2.append('<th>Part/Item</th>');
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Quantity</th>');
+                                    headerRow2.append('<th>Cost</th>');
+                                    headerRow2.append('<th>Email To</th>');
+                                } else if (header.title === 'Fuel') {
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Purchased Qty</th>');
+                                    headerRow2.append('<th>Unit Cost</th>');
+                                    headerRow2.append('<th>Total Cost</th>');
+                                    headerRow2.append('<th>Remaining Qty</th>');
+                                } else if (header.title === 'Parts') {
+                                    headerRow2.append('<th>Item</th>');
+                                    headerRow2.append('<th>Vendor</th>');
+                                    headerRow2.append('<th>Purchased Qty</th>');
+                                    headerRow2.append('<th>Unit Cost</th>');
+                                    headerRow2.append('<th>Total Cost</th>');
+                                    headerRow2.append('<th>Remaining Qty</th>');
+                                } else if (header.title === 'Fuel Allocation') {
+                                    headerRow2.append('<th>Quantity</th>');
+                                    headerRow2.append('<th>Meter</th>');
                                 }
                             });
 
@@ -879,7 +956,8 @@
                             var totalRentalCost = 0;
 
                             // Skip if data does not exist or is an empty object
-                            if (fleetCheck && !correctiveMaintenance && !preventiveMaintenance) {
+                            if (fleetCheck && !correctiveMaintenance && !
+                                preventiveMaintenance) {
                                 headersConfig.push({
                                     title: 'Fleet ID',
                                     colspan: 1,
@@ -1117,7 +1195,33 @@
                                     .toFixed(2))); // Format total
                                 tbody.append(totalRow); // Append total row to the table (3)
                             }
-                            
+
+                            if (fuel_allocation && fleetCheck) {
+                                // Iterate through vehicle IDs
+                                for (var vehicle_id in response.fuel_allocation) {
+                                    var date_data = response.fuel_allocation[vehicle_id];
+
+                                    // Iterate through the dates for each vehicle ID
+                                    for (var date_key in date_data) {
+                                        var allocations = date_data[date_key];
+
+                                        // Now, allocations is an array; you can iterate through it
+                                        allocations.forEach(function(allocation) {
+                                            // Create a new row
+                                            var row = $('<tr></tr>');
+
+                                            // Append cells to the row
+                                            appendCell(row, allocation.date);
+                                            appendCell(row, allocation.meter);
+                                            appendCell(row, allocation.qty);
+
+                                            // Append the row to the table body
+                                            tbody.append(row);
+                                        });
+                                    }
+                                }
+                            }
+
                             if (fleetCheck && correctiveMaintenance && !preventiveMaintenance) {
 
                                 // Dynamically access the corrective_maintenance data
@@ -1174,9 +1278,11 @@
                                             // Create a new row
                                             var row = $('<tr></tr>');
                                             // Replace all commas with line breaks
-                                            var email = item.email_to ? item.email_to.replace(/,/g, '\n ') : 'N/A';
-                                            var emailToFormatted = email.replace(/,/g, '\n');
-                                            
+                                            var email = item.email_to ? item.email_to
+                                                .replace(/,/g, '\n ') : 'N/A';
+                                            var emailToFormatted = email.replace(/,/g,
+                                                '\n');
+
                                             // Append cells to the row using the appendCell function
                                             appendCell(row, item.vehicle.fleet_no);
                                             appendCell(row, item.date);
@@ -1193,6 +1299,68 @@
 
                                             // Append the row to the table body
                                             tbody.append(row);
+                                        });
+                                    }
+                                }
+                            }
+                            if (fuel && !correctiveMaintenance && !preventiveMaintenance && !
+                                shiftDetailsCheck && !fleetCheck) {
+
+                                // Dynamically access the preventive_maintenance data
+                                var fuel_data = response
+                                    .fuel;
+
+                                // Iterate through the keys (e.g., '2', '2023-08-17') to access the arrays
+                                for (var key in fuel_data) {
+                                    var date_key_data = fuel_data[key];
+
+                                    // Iterate through the keys again for the given date (e.g., '2023-08-17')
+                                    for (var date_key in date_key_data) {
+                                        var date_data = date_key_data[date_key];
+
+                                        // Now date_data is an array; you can iterate through it
+                                        date_data.forEach(function(item) {
+                                            var total_cost = item.qty * item
+                                                .cost_per_unit;
+                                            appendRowWithDate(
+                                                item.date,
+                                                [item.vendor.name, item.qty, item
+                                                    .cost_per_unit, total_cost, item
+                                                    .remaining_qty
+                                                ],
+                                                tbody
+                                            );
+                                        });
+                                    }
+                                }
+                            }
+                            if (parts && !fuel && !correctiveMaintenance && !
+                                preventiveMaintenance && !shiftDetailsCheck && !fleetCheck) {
+
+                                // Dynamically access the preventive_maintenance data
+                                var parts_data = response
+                                    .parts;
+
+                                // Iterate through the keys (e.g., '2', '2023-08-17') to access the arrays
+                                for (var key in parts_data) {
+                                    var date_key_data = parts_data[key];
+
+                                    // Iterate through the keys again for the given date (e.g., '2023-08-17')
+                                    for (var date_key in date_key_data) {
+                                        var date_data = date_key_data[date_key];
+
+                                        // Now date_data is an array; you can iterate through it
+                                        date_data.forEach(function(item) {
+                                            var total_cost = item.stock * item
+                                            .unit_cost;
+                                            appendRowWithDate(
+                                                item.date,
+                                                [item.title, item.vendor.name, item
+                                                    .stock, item.unit_cost,
+                                                    total_cost, item.remaining_qty
+                                                ],
+                                                tbody
+                                            );
                                         });
                                     }
                                 }

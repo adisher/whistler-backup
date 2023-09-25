@@ -59,6 +59,18 @@
                                 <?php echo Form::text('title', null, ['class' => 'form-control', 'required']); ?>
 
                             </div>
+                            <div class="form-group">
+                                <?php echo Form::label('date', __('fleet.date'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false); ?>
+
+                                <div class='input-group'>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                    <?php echo Form::text('date', date('Y-m-d'), ['class' => 'form-control', 'required']); ?>
+
+                                </div>
+                            </div>
 
                             <div class="form-group">
                                 <?php echo Form::label(

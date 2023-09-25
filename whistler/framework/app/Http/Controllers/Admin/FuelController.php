@@ -91,9 +91,9 @@ class FuelController extends Controller
             // $data['vehicles'] = VehicleModel::where('id', $vehicle[0]['vehicle_id'])->whereIn_service("1")->get();
             $data['vehicles'] = auth()->user()->vehicles()->whereIn_service("1")->get();
         }
-        $fuel_allocation = FuelAllocationModel::sum('consumption');
-        $fuel_stock = FuelModel::sum('qty');
-        $data['stock'] = $fuel_stock - $fuel_allocation;
+        // $fuel_allocation = FuelAllocationModel::sum('consumption');
+        $fuel_stock = FuelModel::sum('remaining_qty');
+        $data['stock'] = $fuel_stock;
         $data['vendors'] = Vendor::where('type', 'fuel')->get();
         return view('fuel.create', $data);
     }
@@ -148,6 +148,7 @@ class FuelController extends Controller
         // $fuel->province = $request->get('province');
         $fuel->note = $request->get('note');
         $fuel->qty = $request->get('qty');
+        $fuel->remaining_qty = $request->get('qty');
         $fuel->fuel_from = $request->get('fuel_from');
         $fuel->vendor_name = $request->get('vendor_name');
         $fuel->cost_per_unit = $request->get('cost_per_unit');
@@ -192,7 +193,7 @@ class FuelController extends Controller
         if($request->input('fleet_type_id') == 1)
         {
             $fuel->meter = $request->get('meter_reading');
-            $fuel->time = $request->get('hours');
+            $fuel->qty = $request->get('quantity');
             $fuel->consumption = 0;
             $fuel->consumption = $con = $fuel->meter;
             $fuel->time = '0:00';
@@ -232,6 +233,27 @@ class FuelController extends Controller
         }
 
         $fuel->save();
+
+        $vendors = FuelModel::all()->sortByDesc('qty');
+        // Quantity to be allocated
+        $allocateQty = $request->get('quantity');
+        foreach ($vendors as $vendor) {
+            // Calculate 15% of the vendor's total quantity (qty)
+            $limit = 0.15 * $vendor->qty;
+
+            // Check if remaining_qty will be above the calculated 15% limit after allocation
+            if (($vendor->remaining_qty - $allocateQty) >= $limit) {
+                // Deduct the allocated quantity from remaining_qty
+                $vendor->remaining_qty -= $allocateQty;
+
+                // Save changes to FuelModel
+                $vendor->save();
+
+                // Allocation successful, break the loop
+                break;
+        }
+    }
+
 
         // $expense = new Expense();
         // $expense->vehicle_id = $request->get('vehicle_id');

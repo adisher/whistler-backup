@@ -107,7 +107,12 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="card mt-3">
+                                <div class="card-header d-flex align-items-center">
+                                    <h5 class="mb-0">Fuel Allocation</h5>
+                                    <input type="checkbox" id="fuel_allocation" class="ml-auto check-size" />
+                                </div>
+                            </div>
 
                         </div>
                     </div>
