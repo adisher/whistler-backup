@@ -98,7 +98,7 @@ class ShiftDetailsController extends Controller
         $shift = ShiftDetails::create([
             'site_id' => $request->get("site_id"),
             'shift_id' => $request->get("shift_id"),
-            'vehicle_id' => $request->get("vehicle_id"),
+            'vehicle_id' => $request->get("vehicle_id") ?? 0,
             'date' => $request->get("date"),
             'work_hours' => $request->get("work_hours") ?? 0,
             'wastage' => $request->get("wastage"),
@@ -106,10 +106,12 @@ class ShiftDetailsController extends Controller
             'shift_quantity_grams' => $request->get('shift_quantity_grams'),
             'daily_quantity_grams' => $request->get('shift_quantity_grams'),
             'shift_quantity_pounds' => $request->get('shift_quantity_pounds'),
+            'shift_quantity_kgs' => $request->get('shift_quantity_kgs'),
             'daily_quantity_pounds' => $request->get('shift_quantity_pounds'),
             'yield_quality' => $request->get('yield_quality'),
             'net_weight_grams' => $request->get('net_weight_grams'),
             'net_weight_pounds' => $request->get('net_weight_pounds'),
+            'net_weight_kgs' => $request->get('net_weight_kgs'),
             'deleted_at' => null,
             'status' => '0',
         ]);

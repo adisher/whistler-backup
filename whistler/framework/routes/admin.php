@@ -43,6 +43,8 @@ Route::namespace ('Admin')->group(function () {
         Route::get('/vehicles/{id}/expense_amount', 'VehiclesController@getExpense')->name('vehicles.expense');
         Route::get('/vehicles/getMeter/{id}', 'VehiclesController@getMeter')->name('vehicles.getMeter');
 
+        Route::get('/production', 'DashboardController@production')->name('production');
+        Route::get('/work_hours', 'DashboardController@vehicleWorkHours')->name('work_hours');
 
         Route::resource('shifts', ShiftController::class);
         Route::resource('maintenance', CorrectiveMaintenanceController::class);

@@ -193,6 +193,7 @@ class ReportsController extends Controller
         $shift_details = $request->shift_checked;
         $deployment_checked = $request->deployment_checked;
         $fuel_allocation_checked = $request->fuel_allocation_checked;
+        $parts_allocation_checked = $request->parts_allocation_checked;
         $check_corrective_maintenance = $request->corrective_maintenance;
         $check_preventive_maintenance = $request->preventive_maintenance;
 
@@ -208,6 +209,7 @@ class ReportsController extends Controller
         $corrective_maintenance = '';
         $preventive_maintenance = '';
         $fuel_allocation = '';
+        $parts_allocation = '';
 
         // Start building the main query
         $query = WorkOrders::with(['vehicle', 'sites', 'assigned_driver'])
@@ -251,6 +253,16 @@ class ReportsController extends Controller
 
         if($fuel_allocation_checked == "true"){
             $fuel_allocation = FuelAllocationModel::with(['vehicle_data'])
+                ->whereIn('vehicle_id', $fleet_ids)
+                ->whereBetween('date', [$start_date, $end_date]) // Apply date filter
+                ->get()
+                ->groupBy(['vehicle_id', function ($item) {
+                    return $item->date; // Group by date
+                }]);
+        }
+
+        if($parts_allocation_checked == "true"){
+            $parts_allocation = PreventiveMaintenanceLogs::with(['vehicle', 'services', 'parts', 'parts.vendor'])
                 ->whereIn('vehicle_id', $fleet_ids)
                 ->whereBetween('date', [$start_date, $end_date]) // Apply date filter
                 ->get()
@@ -316,7 +328,9 @@ class ReportsController extends Controller
             'preventive_maintenance' => $preventive_maintenance,
             'check_preventive_maintenance' => $check_preventive_maintenance,
             'fuel_allocation_checked' => $fuel_allocation_checked,
+            'parts_allocation_checked' => $parts_allocation_checked,
             'fuel_allocation' => $fuel_allocation,
+            'parts_allocation' => $parts_allocation,
         ]);
     }
 

@@ -66,6 +66,7 @@
                             <th>Shift Yield Details</th>
                             <th>Shift Quantity<br>(grams)</th>
                             <th>Shift Quantity<br>(pounds)</th>
+                            <th>Shift Quantity<br>(kgs)</th>
                             <th>Yield Quality<br>(carats)</th>
                             <th>Wastage<br>(grams)</th>
                             <th>Net Weight<br>(grams)</th>
@@ -95,6 +96,7 @@
                             <th>Shift Yield Details</th>
                             <th>Shift Quantity<br>(grams)</th>
                             <th>Shift Quantity<br>(pounds)</th>
+                            <th>Shift Quantity<br>(kgs)</th>
                             <th>Yield Quality<br>(carats)</th>
                             <th>Wastage<br>(grams)</th>
                             <th>Net Weight<br>(grams)</th>
@@ -339,6 +341,10 @@
                     {
                         data: 'net_weight_pounds',
                         name: 'shift_details.net_weight_pounds'
+                    },
+                    {
+                        data: 'net_weight_kgs',
+                        name: 'shift_details.net_weight_kgs'
                     },
                     {
                         data: 'action',

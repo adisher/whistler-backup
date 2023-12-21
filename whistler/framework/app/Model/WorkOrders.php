@@ -33,6 +33,11 @@ class WorkOrders extends Model
         return $this->belongsTo('App\Model\Site', 'site_id');
     }
 
+    public function shift()
+    {
+        return $this->belongsTo('App\Model\Shift', 'shift_id');
+    }
+
     public function vendor()
     {
         return $this->belongsTo("App\Model\Vendor", "vendor_id", "id")->withTrashed();

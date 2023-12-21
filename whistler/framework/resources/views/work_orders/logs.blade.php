@@ -31,7 +31,7 @@
               <th>Work Hours</th>
               <th>Cost</th>
               <th>@lang('fleet.description')</th>
-              <th>@lang('fleet.action')</th>
+              {{-- <th>@lang('fleet.action')</th> --}}
             </tr>
           </thead>
           <tbody>
@@ -85,7 +85,7 @@
                 {{$row->description}}
                 @endif
               </td>
-              <td>
+              {{-- <td>
                 <div class="btn-group">
                   <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                     <span class="fa fa-gear"></span>
@@ -103,7 +103,7 @@
                 'admin/work_order/'.$row->id,'method'=>'DELETE','class'=>'form-horizontal','id'=>'form_'.$row->id]) !!}
                 {!! Form::hidden("id",$row->id) !!}
                 {!! Form::close() !!}
-              </td>
+              </td> --}}
             </tr>
             @endforeach
           </tbody>
@@ -120,7 +120,7 @@
               <th>Work Hours</th>
               <th>Cost</th>
               <th>@lang('fleet.description')</th>
-              <th>@lang('fleet.action')</th>
+              {{-- <th>@lang('fleet.action')</th> --}}
             </tr>
           </tfoot>
         </table>

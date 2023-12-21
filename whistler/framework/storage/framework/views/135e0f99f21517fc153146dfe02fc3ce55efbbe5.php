@@ -210,6 +210,17 @@
 
                                         </div>
                                     </div>
+                                    <!-- Shift Yield Quantity(kgs) -->
+                                    <div class="form-group">
+                                        <?php echo Form::label('shift_quantity_kgs', __('fleet.shift_quantity') . '(' . __('kgs') . ')', [
+                                        'class' => 'col-xs-5 control-label',
+                                        ]); ?>
+
+                                        <div class="col-xs-6">
+                                            <?php echo Form::number('shift_quantity_kgs', null, ['class' => 'form-control', 'readonly']); ?>
+
+                                        </div>
+                                    </div>
                                     <!-- Yield Image -->
                                     <div class="form-group">
                                         <?php echo Form::label('yield_image', __('fleet.yield_image'), [
@@ -281,6 +292,21 @@
 
                                                 <div class="col-xs-6">
                                                     <?php echo Form::text('net_weight_pounds', null, ['class' => 'form-control', 'readonly']); ?>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Net Weight (Kgs) -->
+                                    <div class="form-group">
+                                        <div class="col-xs-6">
+                                            <div class="form-group">
+                                                <?php echo Form::label('net_weight_kgs', __('Net Weight') . '(' . __('kgs') . ')', [
+                                                    'class' => 'col-xs-5 control-label',
+                                                ]); ?>
+
+                                                <div class="col-xs-6">
+                                                    <?php echo Form::text('net_weight_kgs', null, ['class' => 'form-control', 'readonly']); ?>
 
                                                 </div>
                                             </div>
@@ -395,18 +421,24 @@
             $('input[name="shift_quantity_grams"], input[name="wastage"]').on('keyup', function() {
                 var shift_quantity_grams = parseFloat($('input[name="shift_quantity_grams"]').val()) || 0;
                 var shift_quantity_pounds = shift_quantity_grams * 0.00220462;
+                var shift_quantity_kgs = shift_quantity_grams / 1000; // Conversion to kgs
+                
                 var wastage = parseFloat($('input[name="wastage"]').val()) || 0;
                 var wastage_pounds = wastage * 0.00220462;
-
+                
                 if (wastage > shift_quantity_grams) {
                     alert("Wastage cannot exceed Total Quantity");
                     $('input[name="wastage"]').val('');
                 } else {
                     var net_weight = shift_quantity_grams - wastage;
                     var net_weight_pounds = shift_quantity_pounds - wastage_pounds;
+                    var net_weight_kgs = shift_quantity_kgs - (wastage / 1000); // Net weight in kgs
+                    
                     $('input[name="shift_quantity_pounds"]').val(shift_quantity_pounds.toFixed(2));
+                    $('input[name="shift_quantity_kgs"]').val(shift_quantity_kgs.toFixed(2)); // Set the value for kgs
                     $('input[name="net_weight_grams"]').val(net_weight.toFixed(2));
                     $('input[name="net_weight_pounds"]').val(net_weight_pounds.toFixed(2));
+                    $('input[name="net_weight_kgs"]').val(net_weight_kgs.toFixed(2)); // Set the value for net weight in kgs
                 }
             });
 

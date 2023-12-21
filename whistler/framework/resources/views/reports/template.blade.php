@@ -1,146 +1,146 @@
 @extends('layouts.app')
 @section('extra_css')
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-datepicker.min.css') }}">
-    <style>
-        .card-padding {
-            padding: 5.25rem 0;
-        }
+<link rel="stylesheet" href="{{ asset('assets/css/bootstrap-datepicker.min.css') }}">
+<style>
+    .card-padding {
+        padding: 5.25rem 0;
+    }
 
-        .no-shadow {
-            box-shadow: none !important
-        }
+    .no-shadow {
+        box-shadow: none !important
+    }
 
-        li.selected {
-            background-color: #ccc;
-            /* Change as desired */
-        }
+    li.selected {
+        background-color: #ccc;
+        /* Change as desired */
+    }
 
-        li:hover {
-            cursor: pointer;
-        }
+    li:hover {
+        cursor: pointer;
+    }
 
-        .invalid {
-            border: 1px solid red !important;
-        }
+    .invalid {
+        border: 1px solid red !important;
+    }
 
-        .check-size {
-            width: 20px;
-            height: 20px;
-        }
+    .check-size {
+        width: 20px;
+        height: 20px;
+    }
 
-        /* Custom modal size */
+    /* Custom modal size */
+    .modal-xxl {
+        max-width: 1350px;
+    }
+
+    /* Responsive modal size */
+    @media (max-width: 1200px) {
         .modal-xxl {
-            max-width: 1200px;
+            max-width: 90%;
         }
+    }
 
-        /* Responsive modal size */
-        @media (max-width: 1200px) {
-            .modal-xxl {
-                max-width: 90%;
-            }
+    @media (max-width: 992px) {
+        .modal-xxl {
+            max-width: 80%;
         }
+    }
 
-        @media (max-width: 992px) {
-            .modal-xxl {
-                max-width: 80%;
-            }
+    @media (max-width: 768px) {
+        .modal-xxl {
+            max-width: 100%;
         }
-
-        @media (max-width: 768px) {
-            .modal-xxl {
-                max-width: 100%;
-            }
-        }
-    </style>
+    }
+</style>
 @endsection
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('reports.template') }}">Report</a></li>
-    <li class="breadcrumb-item active">Generate Report</li>
+<li class="breadcrumb-item"><a href="{{ route('reports.template') }}">Report</a></li>
+<li class="breadcrumb-item active">Generate Report</li>
 @endsection
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-success">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        Generate Report
-                    </h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-success">
+            <div class="card-header">
+                <h3 class="card-title">
+                    Generate Report
+                </h3>
+            </div>
+
+            <div class="card-body">
+                @if (count($errors) > 0)
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
+                @endif
 
-                <div class="card-body">
-                    @if (count($errors) > 0)
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                {{-- {!! Form::open(['route' => 'reports.generate', 'method' => 'post']) !!} --}}
+                {{-- {!! Form::hidden('user_id', Auth::user()->id) !!} --}}
+                {{-- {!! Form::hidden('type', 'Created') !!} --}}
+                <div class="form-group">
+                    {!! Form::label(
+                    'date_bracket',
+                    __('From/To (Date)') . ' <span class="text-danger">*</span>',
+                    ['class' => 'form-label'],
+                    false,
+                    ) !!}
+                    <div id="reportrange" class="form-control">
+                        <i class="fa fa-calendar"></i>&nbsp;
+                        <span></span>
+                        <input type="hidden" name="daterange" id="daterange">
+                    </div>
+                </div>
+                @include('reports.includes.report_lists')
+                <br />
+                <button class="btn btn-success mt-3" id="viewButton">View Report</button>
 
-                    {{-- {!! Form::open(['route' => 'reports.generate', 'method' => 'post']) !!} --}}
-                    {{-- {!! Form::hidden('user_id', Auth::user()->id) !!} --}}
-                    {{-- {!! Form::hidden('type', 'Created') !!} --}}
-                    <div class="form-group">
-                        {!! Form::label(
-                            'date_bracket',
-                            __('From/To (Date)') . ' <span class="text-danger">*</span>',
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {!! Form::label(
+                            'report_format',
+                            __('Report Format') . ' <span class="text-danger">*</span>',
                             ['class' => 'form-label'],
                             false,
-                        ) !!}
-                        <div id="reportrange" class="form-control">
-                            <i class="fa fa-calendar"></i>&nbsp;
-                            <span></span>
-                            <input type="hidden" name="daterange" id="daterange">
+                            ) !!}
+                            <select id="report_format" name="report_format" class="form-control" disabled>
+                                {{-- <option value="pdf">PDF</option> --}}
+                                {{-- <option value="csv">CSV</option> --}}
+                                <option value="xlsx">Excel</option>
+                            </select>
                         </div>
-                    </div>
-                    @include('reports.includes.report_lists')
-                    <br />
-                    <button class="btn btn-success mt-3" id="viewButton">View Report</button>
 
-                    <br />
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                {!! Form::label(
-                                    'report_format',
-                                    __('Report Format') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ) !!}
-                                <select id="report_format" name="report_format" class="form-control" disabled>
-                                    {{-- <option value="pdf">PDF</option> --}}
-                                    {{-- <option value="csv">CSV</option> --}}
-                                    <option value="xlsx">Excel</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            {!! Form::label(
+                            'name',
+                            __('Report Name') . ' <span class="text-danger">*</span>',
+                            ['class' => 'form-label'],
+                            false,
+                            ) !!}
+                            {!! Form::text('name', null, ['class' => 'form-control', 'id' => 'name']) !!}
+                        </div>
 
-                            <div class="form-group">
-                                {!! Form::label(
-                                    'name',
-                                    __('Report Name') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ) !!}
-                                {!! Form::text('name', null, ['class' => 'form-control', 'id' => 'name']) !!}
-                            </div>
-
-                            <div class="form-group">
-                                {!! Form::label(
-                                    'frequency',
-                                    __('Select Frequency') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ) !!}
-                                <select id="frequency" name="frequency" class="form-control">
-                                    <option value="" disabled>Select Shift</option>
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="monthly">Monthly</option>
-                                </select>
-                            </div>
-                            {{-- <div class="form-group">
+                        <div class="form-group">
+                            {!! Form::label(
+                            'frequency',
+                            __('Select Frequency') . ' <span class="text-danger">*</span>',
+                            ['class' => 'form-label'],
+                            false,
+                            ) !!}
+                            <select id="frequency" name="frequency" class="form-control">
+                                <option value="" disabled>Select Shift</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        {{-- <div class="form-group">
                             {!! Form::label(
                             'delivery_end_date',
                             __('Delivery End Date') . ' <span class="text-danger">*</span>',
@@ -151,75 +151,230 @@
                         </div> --}}
 
 
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {!! Form::label(
+                            'recipient',
+                            __('Email Report Recipients') . ' <span class="text-danger">*</span>',
+                            ['class' => 'form-label'],
+                            false,
+                            ) !!}
+                            <select id="recipient" name="recipients[]" multiple="multiple" class="form-control">
+                                <option value="">-</option>
+                                @foreach ($recipients as $recipient)
+                                <option value="{{ $recipient->id }}">{{ $recipient->email }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                {!! Form::label(
-                                    'recipient',
-                                    __('Email Report Recipients') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ) !!}
-                                <select id="recipient" name="recipients[]" multiple="multiple" class="form-control">
-                                    <option value="">-</option>
-                                    @foreach ($recipients as $recipient)
-                                        <option value="{{ $recipient->id }}">{{ $recipient->email }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                {!! Form::label(
-                                    'subject',
-                                    __('Email Subject Line') . ' <span class="text-danger">*</span>',
-                                    ['class' => 'form-label'],
-                                    false,
-                                ) !!}
-                                {!! Form::text('subject', null, ['class' => 'form-control']) !!}
-                            </div>
-                            <div class="form-group">
-                                {!! Form::label('email_body', __('Email Content'), ['class' => 'form-label']) !!}
-                                {!! Form::textarea('email_body', null, ['class' => 'form-control', 'rows' => '4']) !!}
-                            </div>
+                        <div class="form-group">
+                            {!! Form::label(
+                            'subject',
+                            __('Email Subject Line') . ' <span class="text-danger">*</span>',
+                            ['class' => 'form-label'],
+                            false,
+                            ) !!}
+                            {!! Form::text('subject', null, ['class' => 'form-control']) !!}
+                        </div>
+                        <div class="form-group">
+                            {!! Form::label('email_body', __('Email Content'), ['class' => 'form-label']) !!}
+                            {!! Form::textarea('email_body', null, ['class' => 'form-control', 'rows' => '4']) !!}
                         </div>
                     </div>
-                    <br />
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-success mt-3" id="schedule">Schedule Email</button>
-                            {{-- {!! Form::submit(__('Schedule Email'), ['class' => 'btn btn-success']) !!} --}}
-                        </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-success mt-3" id="schedule">Schedule Email</button>
+                        {{-- {!! Form::submit(__('Schedule Email'), ['class' => 'btn btn-success']) !!} --}}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Report View Modal -->
-    <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xxl" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    {{-- <img src="{{ asset('assets/images/sample-fleet-rental.png') }}" class="img-fluid"
+<!-- Report View Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xxl" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                {{-- <img src="{{ asset('assets/images/sample-fleet-rental.png') }}" class="img-fluid"
                     alt="Sample Image"> --}}
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-success" id="download">Download</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="download">Download</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
 @endsection
 
 
 @section('script')
-    <script src="{{ asset('assets/js/moment.js') }}"></script>
-    <!-- bootstrap datepicker -->
-    <script src="{{ asset('assets/js/bootstrap-datepicker.min.js') }}"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
+<script src="{{ asset('assets/js/moment.js') }}"></script>
+<!-- bootstrap datepicker -->
+<script src="{{ asset('assets/js/bootstrap-datepicker.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#fuel_allocation').change(function() {
+            if($(this).is(":checked")) {
+                console.log('checked');
+
+                $('#maintenanceMenu').slideUp();
+                $('#correctiveMaintenance').prop('checked', false);
+                $('#preventiveMaintenance').prop('checked', false);
+                
+                $('#deploymentMenu').slideUp();
+                
+                // Clear the multiple select for sites
+                $('#siteList').val(null).trigger('change');
+                
+                // Uncheck the checkboxes for shifts
+                $('#morningShift').prop('checked', false);
+                $('#eveningShift').prop('checked', false);
+
+                $('#parts_allocation').prop('checked', false);
+                $('#maintenanceToggle').prop('checked', false);
+                $('#deploymentToggle').prop('checked', false);
+                $('#maintenanceToggle').prop('checked', false);
+                $('#shiftDetails').prop('checked', false);
+            } else {
+                console.log('unchecked');
+            }
+        });
+
+        $('#parts_allocation').change(function() {
+            if($(this).is(":checked")) {
+                console.log('checked');
+
+                $('#maintenanceMenu').slideUp();
+                $('#correctiveMaintenance').prop('checked', false);
+                $('#preventiveMaintenance').prop('checked', false);
+
+                $('#deploymentMenu').slideUp();
+                
+                // Clear the multiple select for sites
+                $('#siteList').val(null).trigger('change');
+                
+                // Uncheck the checkboxes for shifts
+                $('#morningShift').prop('checked', false);
+                $('#eveningShift').prop('checked', false);
+                
+                $('#fuel_allocation').prop('checked', false);
+                $('#maintenanceToggle').prop('checked', false);
+                $('#deploymentToggle').prop('checked', false);
+                $('#maintenanceToggle').prop('checked', false);
+                $('#shiftDetails').prop('checked', false);
+            } else {
+                console.log('unchecked');
+            }
+        });
+
+        $('#deploymentToggle').change(function() {
+            if ($(this).is(":checked")) {
+                $('#maintenanceMenu').slideUp();
+                $('#correctiveMaintenance').prop('checked', false);
+                $('#preventiveMaintenance').prop('checked', false);
+
+                $('#deploymentMenu').slideDown();
+                $('#fuel_allocation').prop('checked', false);
+                $('#parts_allocation').prop('checked', false);
+                $('#maintenanceToggle').prop('checked', false);
+            } else {
+                $('#deploymentMenu').slideUp();
+                
+                // Clear the multiple select for sites
+                $('#siteList').val(null).trigger('change');
+                
+                // Uncheck the checkboxes for shifts
+                $('#morningShift').prop('checked', false);
+                $('#eveningShift').prop('checked', false);
+            }
+        });
+        
+        $('#maintenanceToggle').change(function() {
+            if ($(this).is(":checked")) {
+                console.log('checked');
+                $('#deploymentMenu').slideUp();
+                // Clear the multiple select for sites
+                $('#siteList').val(null).trigger('change');
+                
+                // Uncheck the checkboxes for shifts
+                $('#morningShift').prop('checked', false);
+                $('#eveningShift').prop('checked', false);
+
+                $('#maintenanceMenu').slideDown();
+                $('#fuel_allocation').prop('checked', false);
+                $('#deploymentToggle').prop('checked', false);
+                $('#parts_allocation').prop('checked', false);
+                $('#rental').prop('checked', false);
+                $('#shiftDetails').prop('checked', false);
+
+                $('#correctiveMaintenance').prop('checked', true);
+                $('#preventiveMaintenance').change(function() {
+                    if ($(this).is(":checked")) {
+                        $('#correctiveMaintenance').prop('checked', false);
+                    }
+                });
+                
+                $('#correctiveMaintenance').change(function() {
+                    if ($(this).is(":checked")) {
+                        $('#preventiveMaintenance').prop('checked', false);
+                    }
+                });
+                
+            } else {
+                console.log('unchecked');
+                $('#maintenanceMenu').slideUp();
+                $('#correctiveMaintenance').prop('checked', false);
+                $('#preventiveMaintenance').prop('checked', false);
+            }
+        });
+
+        $('#shiftDetails').change(function() {
+            if ($(this).is(":checked")) {
+                console.log('checked');
+
+                // Get all existing items in the right container
+                var existingItems = $("#rightContainerList li");
+                
+                existingItems.each(function() {
+                    var itemId = $(this).attr('id');
+                    var originMenuId = $(this).attr('data-origin');
+                    
+                    // If the origin is not 'fleet', move the item back to its original container
+                    if (originMenuId !== '#fleetnolist') {
+                        // Update the respective selected items array to remove the item ID
+                        if (originMenuId === '#partslist') {
+                            selectedItemsArrayParts = selectedItemsArrayParts.filter(item => item !== itemId);
+                        } else if (originMenuId === '#fuellist') {
+                            selectedItemsArrayFuel = selectedItemsArrayFuel.filter(item => item !== itemId);
+                        }
+                        
+                        // Move the item back to its original container
+                        $(this).appendTo(originMenuId).removeClass('selected');
+                    }
+                });
+                
+                // Update the counter for moved assets
+                $('#asset_count').text('Moved Assets: ' + $("#rightContainerList li").length);
+
+                $('#maintenanceMenu').slideUp();
+                $('#maintenanceToggle').prop('checked', false);
+                $('#correctiveMaintenance').prop('checked', false);
+                $('#preventiveMaintenance').prop('checked', false);
+
+                $('#fuel_allocation').prop('checked', false);
+                $('#parts_allocation').prop('checked', false);
+                
+            } else {
+                console.log('unchecked');
+            }
+        });
             $('#recipient').select2({
                 placeholder: "Select Recipients"
             });
@@ -330,43 +485,18 @@
                 });
             });
 
-            $('#deploymentToggle').change(function() {
-                if ($(this).is(":checked")) {
-                    $('#deploymentMenu').slideDown();
-                } else {
-                    $('#deploymentMenu').slideUp();
-
-                    // Clear the multiple select for sites
-                    $('#siteList').val(null).trigger('change');
-
-                    // Uncheck the checkboxes for shifts
-                    $('#morningShift').prop('checked', false);
-                    $('#eveningShift').prop('checked', false);
-                }
-            });
-
-            $('#maintenanceToggle').change(function() {
-                if ($(this).is(":checked")) {
-                    $('#maintenanceMenu').slideDown();
-                } else {
-                    $('#maintenanceMenu').slideUp();
-                    $('#correctiveMaintenance').prop('checked', false);
-                    $('#preventiveMaintenance').prop('checked', false);
-                }
-            });
-
-
+            
             function setupAccordionToggle(buttonId) {
                 $(buttonId).on('click', function() {
                     var icon = $(this).find('i');
                     var isExpanded = $(this).attr('aria-expanded') == 'false';
                     if (isExpanded) {
-                        icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                        icon.removeClass('fa-chevron-left').addClass('fa-chevron-down');
                         // Remove 'disabled' class from all buttons
                         $('#moveAllLeftButton, #moveLeftButton, #moveRightButton, #moveAllRightButton')
                             .removeClass('disabled');
                     } else {
-                        icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                        icon.removeClass('fa-chevron-down').addClass('fa-chevron-left');
                         // Add 'disabled' class to all buttons
                         $('#moveAllLeftButton, #moveLeftButton, #moveRightButton, #moveAllRightButton')
                             .addClass('disabled');
@@ -455,6 +585,31 @@
 
                 console.log('selectedItemsArray: ', selectedItemsArray);
 
+                // Before appending new items, check if they are from 'fuel'
+                if (origin === 'fuel') {
+                    console.log('origin is fuel');
+                    // Get all items currently in the right container
+                    var existingItems = $("#rightContainerList li");
+                    
+                    // Move existing items back to their original containers
+                    existingItems.each(function() {
+                        var itemId = $(this).attr('id');
+                        var originMenuId = $(this).attr('data-origin');
+                        
+                        // Remove the id from the respective selected items array
+                        if (originMenuId === '#fleetnolist') {
+                            selectedItemsArrayFleet = selectedItemsArrayFleet.filter(item => item !== itemId);
+                        } else if (originMenuId === '#partslist') {
+                            selectedItemsArrayParts = selectedItemsArrayParts.filter(item => item !== itemId);
+                        } else if (originMenuId === '#fuellist') {
+                            selectedItemsArrayFuel = selectedItemsArrayFuel.filter(item => item !== itemId);
+                        }
+                        
+                        // Move the item back to its original container
+                        $(this).appendTo(originMenuId).removeClass('selected');
+                    });
+                }
+
                 // Move selected items to the right container
                 selectedItems.appendTo("#rightContainerList").removeClass('selected');
 
@@ -473,33 +628,26 @@
                 // get ids of selected items and remove them from the array
                 selectedItems.each(function() {
                     var itemId = $(this).attr('id');
-                    var origin = $(this).data(
-                        'origin'); // get the origin from the data-origin attribute
+                    var origin = $(this).data('origin'); // get the origin from the data-origin attribute
 
                     if (origin === 'fleet') {
-                        selectedItemsArrayFleet = selectedItemsArrayFleet.filter(item => item !==
-                            itemId);
+                        selectedItemsArrayFleet = selectedItemsArrayFleet.filter(item => item !== itemId);
                         // move selected items back to the fleet list
                         $(this).appendTo("#fleetnolist").removeClass('selected');
                         // update count of selected assets
-                        $('#asset_count').text('Selected Assets: ' + selectedItemsArrayFleet
-                            .length);
+                        $('#asset_count').text('Selected Assets: ' + selectedItemsArrayFleet.length);
                     } else if (origin === 'parts') {
-                        selectedItemsArrayParts = selectedItemsArrayParts.filter(item => item !==
-                            itemId);
+                        selectedItemsArrayParts = selectedItemsArrayParts.filter(item => item !== itemId);
                         // move selected items back to the parts list
                         $(this).appendTo("#partslist").removeClass('selected');
                         // update count of selected assets
-                        $('#asset_count_parts').text('Selected Assets: ' + selectedItemsArrayParts
-                            .length);
+                        $('#asset_count_parts').text('Selected Assets: ' + selectedItemsArrayParts.length);
                     } else if (origin === 'fuel') {
-                        selectedItemsArrayFuel = selectedItemsArrayFuel.filter(item => item !==
-                            itemId);
+                        selectedItemsArrayFuel = selectedItemsArrayFuel.filter(item => item !== itemId);
                         // move selected items back to the fuel list
                         $(this).appendTo("#fuellist").removeClass('selected');
                         // update count of selected assets
-                        $('#asset_count_fuel').text('Selected Assets: ' + selectedItemsArrayFuel
-                            .length);
+                        $('#asset_count_fuel').text('Selected Assets: ' + selectedItemsArrayFuel.length);
                     }
                 });
             });
@@ -525,6 +673,30 @@
                 } else {
                     return;
                 }
+
+                // If the Fuel Inventory menu is open, move all existing items back to their original containers
+                if (openMenuId === '#fuellist' || openMenuId === '#partslist' || openMenuId === '#fleetnolist') {
+                    var existingItems = $("#rightContainerList li");
+                    
+                    existingItems.each(function() {
+                        var itemId = $(this).attr('id');
+                        var originMenuId = $(this).attr('data-origin');
+                        
+                        // Remove the id from the respective selected items array
+                        if (originMenuId === '#fleetnolist') {
+                            selectedItemsArrayFleet = selectedItemsArrayFleet.filter(item => item !== itemId);
+                        } else if (originMenuId === '#partslist') {
+                            selectedItemsArrayParts = selectedItemsArrayParts.filter(item => item !== itemId);
+                        } else if (originMenuId === '#fuellist') {
+                            selectedItemsArrayFuel = selectedItemsArrayFuel.filter(item => item !== itemId);
+                        }
+                        
+                        // Move the item back to its original container
+                        $(this).appendTo(originMenuId).removeClass('selected');
+                    });
+                }
+
+                
 
                 // get all items in the open menu
                 var allItems = $(openMenuId + " li");
@@ -576,93 +748,6 @@
                 $('#asset_count').text('Moved Assets: ' + $("#rightContainerList li").length);
             });
 
-            // $('#viewButton').click(function(e) {
-            //     e.preventDefault();
-
-            //     console.log('here');
-            //     var data = [{
-            //             fleet_details: "Fleet 1",
-            //             date: "2023-07-03",
-            //             site_shift: [{
-            //                     site: "Site 1",
-            //                     shift: "Morning"
-            //                 },
-            //                 {
-            //                     site: "Site 1",
-            //                     shift: "Evening"
-            //                 }
-            //             ],
-            //             rental_data: "$100.00"
-            //         },
-            //         {
-            //             fleet_details: "Fleet 2",
-            //             date: "2023-07-03",
-            //             site_shift: [{
-            //                     site: "Site 2",
-            //                     shift: "Morning"
-            //                 },
-            //                 {
-            //                     site: "Site 2",
-            //                     shift: "Evening"
-            //                 }
-            //             ],
-            //             rental_data: "$120.00"
-            //         },
-            //         {
-            //             fleet_details: "Fleet 3",
-            //             date: "2023-07-04",
-            //             site_shift: [{
-            //                 site: "Site 3",
-            //                 shift: "Morning"
-            //             }],
-            //             rental_data: "$130.00"
-            //         }
-            //     ];
-
-            //     // Create table
-            //     var table = $('<table></table>').addClass('table table-bordered');
-            //     var tbody = $('<tbody></tbody>');
-            //     var prevDate = "";
-
-            //     $.each(data, function(i, item) {
-            //         $.each(item.site_shift, function(j, shiftData) {
-            //             var row = $('<tr></tr>');
-
-            //             // Fleet details column
-            //             if (j === 0) {
-            //                 row.append($('<td rowspan="' + item.site_shift.length +
-            //                     '"></td>').text(item.fleet_details));
-            //             }
-
-            //             // Date column
-            //             if (item.date !== prevDate) {
-            //                 prevDate = item.date;
-            //                 row.append($('<td rowspan="' + item.site_shift.length +
-            //                     '"></td>').text(item.date));
-            //             }
-
-            //             // Site and shift column
-            //             row.append($('<td></td>').text(shiftData.site + ' ' + shiftData
-            //                 .shift));
-
-            //             // Rental data column
-            //             if (j === 0) {
-            //                 row.append($('<td rowspan="' + item.site_shift.length +
-            //                     '"></td>').text(item.rental_data));
-            //             }
-
-            //             tbody.append(row);
-            //         });
-            //     });
-
-            //     table.append(tbody);
-
-            //     // Insert the table into the modal body
-            //     $('#reportModal .modal-body').empty().append(table);
-
-            //     // Show the modal
-            //     $('#reportModal').modal('show');
-            // });
 
             function appendCell(row, value, rowspan = 1, isHtml = false) {
                 var cell = $('<td></td>');
@@ -679,7 +764,7 @@
 
             // Function to generate headers config
             function generateHeadersConfig(fleetCheck, correctiveMaintenance, preventiveMaintenance,
-                shiftDetailsCheck, fuel, parts, fuel_allocation) {
+                shiftDetailsCheck, fuel, parts, fuel_allocation, parts_allocation) {
                 var config = [
                     fleetCheck ? {
                         title: 'Fleet ID',
@@ -703,30 +788,44 @@
                     });
                 }
 
-                if (!fuel && !correctiveMaintenance && !preventiveMaintenance && !fuel_allocation && fleetCheck || shiftDetailsCheck) {
+                if (!fuel && !parts && !correctiveMaintenance && !preventiveMaintenance && !fuel_allocation && !parts_allocation && fleetCheck && !shiftDetailsCheck) {
                     config.push({
                         title: 'Deployment',
-                        colspan: 4
+                        colspan: 6
+                    });
+                }
+
+                if (!fuel && !parts && !correctiveMaintenance && !preventiveMaintenance && !fuel_allocation && !parts_allocation && shiftDetailsCheck && fleetCheck) {
+                    config.push({
+                        title: 'Deployment',
+                        colspan: 5
                     });
                 }
 
                 if (!fuel && shiftDetailsCheck && !correctiveMaintenance && !preventiveMaintenance) {
                     config.push({
                         title: 'Shift Details',
-                        colspan: 6
+                        colspan: 10
                     });
                 }
-                if (fuel_allocation && !fuel && shiftDetailsCheck && !correctiveMaintenance && !
+                if (fuel_allocation && !fuel && !shiftDetailsCheck && !correctiveMaintenance && !
                     preventiveMaintenance) {
                     config.push({
                         title: 'Fuel Allocation',
                         colspan: 6
                     });
                 }
+                if (parts_allocation && !fuel_allocation && !fuel && !shiftDetailsCheck && !correctiveMaintenance && !
+                    preventiveMaintenance) {
+                    config.push({
+                        title: 'Spare & Tools Allocation',
+                        colspan: 6
+                    });
+                }
 
                 if (fuel && !correctiveMaintenance && !preventiveMaintenance && !shiftDetailsCheck && !fleetCheck) {
                     config.push({
-                        title: 'Fuel',
+                        title: 'Fuel Inventory',
                         colspan: 5
                     });
                 }
@@ -734,7 +833,7 @@
                 if (parts && !fuel && !correctiveMaintenance && !preventiveMaintenance && !shiftDetailsCheck && !
                     fleetCheck) {
                     config.push({
-                        title: 'Parts',
+                        title: 'Spare & Tools Inventory',
                         colspan: 6
                     });
                 }
@@ -781,6 +880,7 @@
                             rental_checked: $('#rental').is(':checked'),
                             shift_checked: $('#shiftDetails').is(':checked'),
                             fuel_allocation_checked: $('#fuel_allocation').is(':checked'),
+                            parts_allocation_checked: $('#parts_allocation').is(':checked'),
                             deployment_checked: $('#deploymentToggle').is(':checked'),
                             sites: JSON.stringify(selectedSites),
                             shifts: JSON.stringify(selectedShifts),
@@ -807,6 +907,12 @@
                             } else {
                                 console.log('fuel_allocation empty: ', fuel_allocation);
                             }
+                            var parts_allocation = response.parts_allocation_checked == "true";
+                            if (parts_allocation) {
+                                console.log('parts_allocation: ', parts_allocation);
+                            } else {
+                                console.log('parts_allocation empty: ', parts_allocation);
+                            }
 
                             var fuel = response['fuel'] != '';
                             if (fuel) {
@@ -824,7 +930,7 @@
 
                             var headersConfig = generateHeadersConfig(fleetCheck,
                                 correctiveMaintenance, preventiveMaintenance,
-                                shiftDetailsCheck, fuel, parts, fuel_allocation);
+                                shiftDetailsCheck, fuel, parts, fuel_allocation, parts_allocation);
 
                             function appendRowWithDate(date, data, tbody) {
                                 var row = $('<tr></tr>');
@@ -889,7 +995,7 @@
                                     headerRow2.append('<th>Site</th>');
                                     headerRow2.append('<th>Shift</th>');
                                     if (fleetCheck) {
-                                        headerRow2.append('<th>Driver/Operator</th>');
+                                        headerRow2.append('<th>Driver/ Operator</th>');
                                         headerRow2.append('<th>Meter</th>');
                                         headerRow2.append('<th>Work Hrs</th>');
                                     }
@@ -898,12 +1004,19 @@
                                         headerRow2.append('<th>Rental</th>');
                                     }
                                 } else if (header.title === 'Shift Details') {
+                                    if(!fleetCheck && shiftDetailsCheck){
+                                        headerRow2.append('<th>Site</th>');
+                                        headerRow2.append('<th>Shift</th>');
+                                    }
                                     headerRow2.append(
                                         '<th>Shift Quantity (grams)</th>');
                                     headerRow2.append(
                                         '<th>Shift Quantity (pounds)</th>');
+                                    headerRow2.append(
+                                        '<th>Shift Quantity (kgs)</th>');
                                     headerRow2.append('<th>Net Weight (grams)</th>');
                                     headerRow2.append('<th>Net Weight (pounds)</th>');
+                                    headerRow2.append('<th>Net Weight (kgs)</th>');
                                     headerRow2.append('<th>Wastage (grams)</th>');
                                     headerRow2.append(
                                         '<th>Yield Quality (carats)</th>');
@@ -925,13 +1038,13 @@
                                     headerRow2.append('<th>Quantity</th>');
                                     headerRow2.append('<th>Cost</th>');
                                     headerRow2.append('<th>Email To</th>');
-                                } else if (header.title === 'Fuel') {
+                                } else if (header.title === 'Fuel Inventory') {
                                     headerRow2.append('<th>Vendor</th>');
                                     headerRow2.append('<th>Purchased Qty</th>');
                                     headerRow2.append('<th>Unit Cost</th>');
                                     headerRow2.append('<th>Total Cost</th>');
                                     headerRow2.append('<th>Remaining Qty</th>');
-                                } else if (header.title === 'Parts') {
+                                } else if (header.title === 'Spare & Tools Inventory') {
                                     headerRow2.append('<th>Item</th>');
                                     headerRow2.append('<th>Vendor</th>');
                                     headerRow2.append('<th>Purchased Qty</th>');
@@ -939,8 +1052,12 @@
                                     headerRow2.append('<th>Total Cost</th>');
                                     headerRow2.append('<th>Remaining Qty</th>');
                                 } else if (header.title === 'Fuel Allocation') {
+                                    headerRow2.append('<th>Quantity (Ltr)</th>');
+                                    headerRow2.append('<th>Meter/Hours</th>');
+                                } else if (header.title === 'Spare & Tools Allocation') {
+                                    headerRow2.append('<th>Item</th>');
                                     headerRow2.append('<th>Quantity</th>');
-                                    headerRow2.append('<th>Meter</th>');
+                                    headerRow2.append('<th>Total Price</th>');
                                 }
                             });
 
@@ -953,10 +1070,24 @@
 
                             var data = response['rental'];
                             var totalRentalCost = 0;
+                            var totalWorkHrs = 0;
+                            let totalHours = 0;
+                            let totalMinutes = 0;
+                            var totalWorkHrsAppended = false; // Flag to ensure totalWorkHrs is appended only once
+                            var totalRow = $('<tr></tr>');
+                            var totals = {
+                                shift_quantity_grams: 0,
+                                shift_quantity_pounds: 0,
+                                shift_quantity_kgs: 0,
+                                net_weight_grams: 0,
+                                net_weight_pounds: 0,
+                                net_weight_kgs: 0,
+                                wastage: 0,
+                            };
 
                             // Skip if data does not exist or is an empty object
                             if (fleetCheck && !correctiveMaintenance && !
-                                preventiveMaintenance) {
+                                preventiveMaintenance && !fuel_allocation && !parts_allocation) {
                                 headersConfig.push({
                                     title: 'Fleet ID',
                                     colspan: 1,
@@ -981,6 +1112,9 @@
                                             siteItems) {
                                             var siteCell = null;
                                             var siteRows = 0;
+                                            // Reset total hours and minutes for each site
+                                            // totalHours = 0;
+                                            // totalMinutes = 0;
 
                                             $.each(siteItems, function(
                                                 i, item) {
@@ -1043,6 +1177,18 @@
                                                     meter,
                                                     1, true
                                                 );
+                                                // Step 1: Break down the hours and minutes
+                                                let [hours, minutes] = item.work_hours.split(':').map(Number);
+                                                
+                                                // Step 2: Add them to the total
+                                                totalHours += hours;
+                                                totalMinutes += minutes;
+                                                console.log('workHours: ', workHours);
+                                                console.log('hours: ', hours);
+                                                console.log('minutes: ', minutes);
+                                                console.log('totalHours: ', totalHours);
+                                                console.log('totalMinutes: ', totalMinutes);
+
                                                 appendCell(row,
                                                     workHours
                                                 );
@@ -1117,12 +1263,22 @@
                                                                 appendCell
                                                                     (row,
                                                                         shiftDetail
+                                                                        .shift_quantity_kgs
+                                                                    );
+                                                                appendCell
+                                                                    (row,
+                                                                        shiftDetail
                                                                         .net_weight_grams
                                                                     );
                                                                 appendCell
                                                                     (row,
                                                                         shiftDetail
                                                                         .net_weight_pounds
+                                                                    );
+                                                                appendCell
+                                                                    (row,
+                                                                        shiftDetail
+                                                                        .net_weight_kgs
                                                                     );
                                                                 appendCell
                                                                     (row,
@@ -1134,6 +1290,14 @@
                                                                         shiftDetail
                                                                         .yield_quality
                                                                     );
+                                                                    // Update totals
+                                                                    totals.shift_quantity_grams += parseFloat(shiftDetail.shift_quantity_grams);
+                                                                    totals.shift_quantity_pounds += parseFloat(shiftDetail.shift_quantity_pounds);
+                                                                    totals.shift_quantity_kgs += parseFloat(shiftDetail.shift_quantity_kgs);
+                                                                    totals.net_weight_grams += parseFloat(shiftDetail.net_weight_grams);
+                                                                    totals.net_weight_pounds += parseFloat(shiftDetail.net_weight_pounds);
+                                                                    totals.net_weight_kgs += parseFloat(shiftDetail.net_weight_kgs);
+                                                                    totals.wastage += parseFloat(shiftDetail.wastage);
                                                             });
                                                 }
 
@@ -1142,17 +1306,48 @@
                                                     row);
                                                 siteRows++;
                                             });
-
+                                            
                                             // Update rowspan for the site cell
                                             if (siteCell) siteCell.attr(
                                                 'rowspan', siteRows);
+                                            });
                                         });
-                                    });
-
-                                    // Update rowspan for the fleet details cell
-                                    if (fleetCell) fleetCell.attr('rowspan',
+                                        
+                                        // Update rowspan for the fleet details cell
+                                        if (fleetCell) fleetCell.attr('rowspan',
                                         rowsCreated);
-                                });
+                                    });
+                                    if (!totalWorkHrsAppended) {
+                                        // var totalRow = $('<tr></tr>');
+                                        // Step 3: Convert total minutes to hours and remaining minutes
+                                        totalHours += Math.floor(totalMinutes / 60);
+                                        totalMinutes %= 60;
+                                        
+                                        // Convert back to HH:MM format
+                                        let totalWorkHrs = `${String(totalHours).padStart(2, '0')}:${String(totalMinutes).padStart(2, '0')}`;
+                                        
+                                        // Skip the first 5 columns to directly place the values starting from the 6th column
+                                        for (var i = 0; i < 6; i++) totalRow.append('<td></td>');
+                                            
+                                            // Append the totalWorkHrs to the 6th column, properly formatted
+                                            totalRow.append($('<td></td>').text(totalWorkHrs));
+                                            if(shiftDetailsCheck){
+                                                totalRow.append($('<td></td>').text(totals.shift_quantity_grams));
+                                                totalRow.append($('<td></td>').text(totals.shift_quantity_pounds));
+                                                totalRow.append($('<td></td>').text(totals.shift_quantity_kgs));
+                                                totalRow.append($('<td></td>').text(totals.net_weight_grams));
+                                                totalRow.append($('<td></td>').text(totals.net_weight_pounds));
+                                                totalRow.append($('<td></td>').text(totals.net_weight_kgs));
+                                                totalRow.append($('<td></td>').text(totals.wastage));
+                                                totalRow.append($('<td></td>').text(totals.yield_quality));
+                                            }
+                                        
+                                            // Append total row to the table
+                                            tbody.append(totalRow);
+                                        
+                                            totalWorkHrsAppended = true; // Set the flag to true
+                                    }
+                                    totalWorkHrsAppended = false;
                             }
                             if (response.shift_checked == 'true' && !fleetCheck) {
                                 response.shift_details.forEach(function(shiftDetail) {
@@ -1176,26 +1371,60 @@
                                     // Append other details
                                     appendCell(row, shiftDetail.shift_quantity_grams);
                                     appendCell(row, shiftDetail.shift_quantity_pounds);
+                                    appendCell(row, shiftDetail.shift_quantity_kgs);
                                     appendCell(row, shiftDetail.net_weight_grams);
                                     appendCell(row, shiftDetail.net_weight_pounds);
+                                    appendCell(row, shiftDetail.net_weight_kgs);
                                     appendCell(row, shiftDetail.wastage);
                                     appendCell(row, shiftDetail.yield_quality);
+
+                                    // Update totals
+                                    totals.shift_quantity_grams += parseFloat(shiftDetail.shift_quantity_grams);
+                                    totals.shift_quantity_pounds += parseFloat(shiftDetail.shift_quantity_pounds);
+                                    totals.shift_quantity_kgs += parseFloat(shiftDetail.shift_quantity_kgs);
+                                    totals.net_weight_grams += parseFloat(shiftDetail.net_weight_grams);
+                                    totals.net_weight_pounds += parseFloat(shiftDetail.net_weight_pounds);
+                                    totals.net_weight_kgs += parseFloat(shiftDetail.net_weight_kgs);
+                                    totals.wastage += parseFloat(shiftDetail.wastage);
+                                    
 
                                     // Append the row to the tbody
                                     tbody.append(row);
                                 });
+
+                                if(shiftDetailsCheck){
+                                    
+                                    totalRow.find('td').eq(0).text('Totals');
+                                    for (var i = 0; i < 3; i++) totalRow.append('<td></td>');
+                                        totalRow.append($('<td></td>').text((totals.shift_quantity_grams || 0).toFixed(2)));
+                                        totalRow.append($('<td></td>').text((totals.shift_quantity_pounds || 0).toFixed(2)));
+                                        totalRow.append($('<td></td>').text((totals.shift_quantity_kgs || 0).toFixed(2)));
+                                        totalRow.append($('<td></td>').text((totals.net_weight_grams || 0).toFixed(2)));
+                                        totalRow.append($('<td></td>').text((totals.net_weight_pounds || 0).toFixed(2)));
+                                        totalRow.append($('<td></td>').text((totals.net_weight_kgs || 0).toFixed(2)));
+                                        totalRow.append($('<td></td>').text((totals.wastage || 0).toFixed(2)));
+                                }
+                                tbody.append(totalRow);
                             }
 
                             if (response.rental_checked == 'true' && fleetCheck) {
-                                var totalRow = $('<tr></tr>');
-                                totalRow.append(
-                                    '<td colspan="7">Total Rental Cost</td>'); // Adjust colspan
-                                totalRow.append($('<td></td>').text('$' + totalRentalCost
-                                    .toFixed(2))); // Format total
-                                tbody.append(totalRow); // Append total row to the table (3)
+                                totalRow.find('td').eq(0).text('Totals');
+                                if (!shiftDetailsCheck) {
+                                    // Your existing logic for when shiftDetailsCheck is false
+                                    totalRow.append($('<td></td>').text('$' + totalRentalCost.toFixed(2)));
+                                } else {
+                                    // When shiftDetailsCheck is true, add total rental cost next to total work hours
+                                    // Assuming totalWorkHrs is at the 6th column (0-based index)
+                                    totalRow.find('td').eq(6).after($('<td></td>').text('$' + totalRentalCost.toFixed(2)));
+                                }
+                                
+                                // Append total row to the table
+                                tbody.append(totalRow);
                             }
 
-                            if (fuel_allocation && fleetCheck) {
+                            var totalFuelAllocationQuantity = 0;
+
+                            if (fuel_allocation && fleetCheck && !parts_allocation) {
                                 // Iterate through vehicle IDs
                                 for (var vehicle_id in response.fuel_allocation) {
                                     var date_data = response.fuel_allocation[vehicle_id];
@@ -1210,15 +1439,70 @@
                                             var row = $('<tr></tr>');
 
                                             // Append cells to the row
+                                            appendCell(row, allocation.vehicle_data.fleet_no);
                                             appendCell(row, allocation.date);
-                                            appendCell(row, allocation.meter);
                                             appendCell(row, allocation.qty);
+                                            
+                                            var lastCellContent;
+                                            if (allocation.time === "0:00") {
+                                                lastCellContent = allocation.meter;
+                                            } else if (allocation.meter == 0) {
+                                                lastCellContent = allocation.time;
+                                            } else {
+                                                lastCellContent = "N/A"; // Replace with what you want
+                                            }
+                                            appendCell(row, lastCellContent);
+
+                                            totalFuelAllocationQuantity += parseFloat(allocation.qty);
 
                                             // Append the row to the table body
                                             tbody.append(row);
                                         });
                                     }
                                 }
+                                // Create and append the totals row after the loop
+                                totalRow.append('<td colspan="2">Totals</td>'); // Adjust colspan as needed
+                                totalRow.append($('<td></td>').text(totalFuelAllocationQuantity.toFixed(2)));
+                                tbody.append(totalRow);
+                            }
+                            var totalPartsAllocationQuantity = 0;
+                            var totalPartsAllocationPrice = 0;
+                            if (parts_allocation && fleetCheck) {
+                                // Iterate through vehicle IDs
+                                for (var vehicle_id in response.parts_allocation) {
+                                    var date_data = response.parts_allocation[vehicle_id];
+
+                                    // Iterate through the dates for each vehicle ID
+                                    for (var date_key in date_data) {
+                                        var allocations = date_data[date_key];
+
+                                        // Now, allocations is an array; you can iterate through it
+                                        allocations.forEach(function(allocation) {
+                                            // Create a new row
+                                            var row = $('<tr></tr>');
+
+                                            // Append cells to the row
+                                            appendCell(row, allocation.vehicle.fleet_no);
+                                            appendCell(row, allocation.date);
+                                            appendCell(row, allocation.parts.title);
+                                            appendCell(row, allocation.quantity);
+                                            appendCell(row, allocation.price);
+
+                                            // Accumulate totals
+                                            totalPartsAllocationQuantity += parseFloat(allocation.quantity);
+                                            totalPartsAllocationPrice += parseFloat(allocation.price);
+                                            
+
+                                            // Append the row to the table body
+                                            tbody.append(row);
+                                        });
+                                    }
+                                }
+                                // Create and append the totals row after the loop
+                                totalRow.append('<td colspan="3">Totals</td>'); // Adjust colspan as needed
+                                totalRow.append($('<td></td>').text(totalPartsAllocationQuantity.toFixed(2)));
+                                totalRow.append($('<td></td>').text(totalPartsAllocationPrice.toFixed(2)));
+                                tbody.append(totalRow);
                             }
 
                             if (fleetCheck && correctiveMaintenance && !preventiveMaintenance) {
@@ -1443,7 +1727,7 @@
             });
 
         });
-    </script>
+</script>
 @endsection
 
 

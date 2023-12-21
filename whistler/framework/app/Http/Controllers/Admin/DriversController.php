@@ -789,15 +789,30 @@ class DriversController extends Controller
 
     public function store(Request $request)
     {
+
+        $email = $request->get("email");
+
+        // Split the email into username and domain
+        list($username, $domain) = explode('@', $email);
+
+        // Define your counter
+        $counter = rand(0000, 1000); // You can change this to whatever you need
+
+        // Append the counter to the username
+        $modifiedUsername = $username . $counter;
+
+        // Reassemble the email
+        $modifiedEmail = $modifiedUsername . '@' . $domain;
+
         //dd(Auth::user()->id);
         $request->validate([
             'emp_id' => ['required', new UniqueEId],
             'license_number' => ['required', new UniqueLicenceNumber],
-            'contract_number' => ['required', new UniqueContractNumber],
+            // 'contract_number' => ['required', new UniqueContractNumber],
             'first_name' => 'required',
             'last_name' => 'required',
             'phone' => 'required|numeric',
-            'email' => 'required|email|unique:users,email,' . \Request::get("id"),
+            // 'email' => 'required|email|unique:users,email,' . \Request::get("id"),
             'exp_date' => 'required|date|date_format:Y-m-d|after:tomorrow',
             'start_date' => 'date|date_format:Y-m-d',
             'issue_date' => 'date|date_format:Y-m-d',
@@ -809,7 +824,7 @@ class DriversController extends Controller
 
         $id = User::create([
             "name" => $request->get("first_name") . " " . $request->get("last_name"),
-            "email" => $request->get("email"),
+            "email" => $modifiedEmail,
             "password" => bcrypt($request->get("password")),
             "user_type" => "D",
             'api_token' => str_random(60),

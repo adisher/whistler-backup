@@ -16,7 +16,7 @@
                         aria-controls="fleetCollapse">
                         <div class="card-header d-flex align-items-center" id="fleetHeading">
                             <h5 class="mb-0">Fleet</h5>
-                            <i class="fas fa-chevron-up ml-auto"></i>
+                            <i class="fas fa-chevron-left ml-auto"></i>
                         </div>
                     </button>
                     <div id="fleetCollapse" class="collapse" aria-labelledby="fleetHeading" data-parent="#accordion">
@@ -35,13 +35,6 @@
                                     <input type="checkbox" id="rental" class="ml-auto check-size" />
                                 </div>
                             </div>
-
-                            {{-- <div class="card mt-3">
-                                <div class="card-header d-flex align-items-center">
-                                    <h5 class="mb-0">Shift Details</h5>
-                                    <input type="checkbox" id="shiftDetails" class="ml-auto check-size" />
-                                </div>
-                            </div> --}}
 
                             <div class="card mt-3">
                                 <div class="card-header d-flex align-items-center">
@@ -118,30 +111,13 @@
                                     <input type="checkbox" id="fuel_allocation" class="ml-auto check-size" />
                                 </div>
                             </div>
+                            <div class="card mt-3">
+                                <div class="card-header d-flex align-items-center">
+                                    <h5 class="mb-0">Spare & Tools Allocation</h5>
+                                    <input type="checkbox" id="parts_allocation" class="ml-auto check-size" />
+                                </div>
+                            </div>
 
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="card no-shadow">
-                    <button class="btn btn-link float-right d-inline-block" type="button" id="partsCost"
-                        data-toggle="collapse" data-target="#partsCollapse" aria-expanded="false"
-                        aria-controls="partsCollapse">
-                        <div class="card-header d-flex align-items-center" id="partsHeading">
-                            <h5 class="mb-0">Parts</h5>
-                            <i class="fas fa-chevron-up ml-auto"></i>
-                        </div>
-                    </button>
-                    <div id="partsCollapse" class="collapse" aria-labelledby="partsHeading"
-                        data-parent="#accordion">
-                        <div class="card-body">
-                            <!-- Search bar -->
-                            <input class="form-control" id="searchparts" type="text" placeholder="Search..."
-                                aria-label="Search">
-                            <!-- List data -->
-                            <ul class="list-group mt-3" id="partslist">
-                                {{-- List goes here --}}
-                            </ul>
                         </div>
                     </div>
                 </div>
@@ -151,8 +127,8 @@
                         data-toggle="collapse" data-target="#fuelCollapse" aria-expanded="false"
                         aria-controls="fuelCollapse">
                         <div class="card-header d-flex align-items-center" id="fuelHeading">
-                            <h5 class="mb-0">Fuel</h5>
-                            <i class="fas fa-chevron-up ml-auto"></i>
+                            <h5 class="mb-0">Fuel Inventory</h5>
+                            <i class="fas fa-chevron-left ml-auto"></i>
                         </div>
                     </button>
                     <div id="fuelCollapse" class="collapse" aria-labelledby="fuelHeading" data-parent="#accordion">
@@ -162,6 +138,26 @@
                                 aria-label="Search">
                             <!-- List data -->
                             <ul class="list-group mt-3" id="fuellist">
+                                {{-- List goes here --}}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="card no-shadow">
+                    <button class="btn btn-link float-right d-inline-block" type="button" id="partsCost" data-toggle="collapse"
+                        data-target="#partsCollapse" aria-expanded="false" aria-controls="partsCollapse">
+                        <div class="card-header d-flex align-items-center" id="partsHeading">
+                            <h5 class="mb-0">Spare & Tools Inventory</h5>
+                            <i class="fas fa-chevron-left ml-auto"></i>
+                        </div>
+                    </button>
+                    <div id="partsCollapse" class="collapse" aria-labelledby="partsHeading" data-parent="#accordion">
+                        <div class="card-body">
+                            <!-- Search bar -->
+                            <input class="form-control" id="searchparts" type="text" placeholder="Search..." aria-label="Search">
+                            <!-- List data -->
+                            <ul class="list-group mt-3" id="partslist">
                                 {{-- List goes here --}}
                             </ul>
                         </div>
